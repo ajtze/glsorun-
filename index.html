@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GLSORUN — Neumorphism Toolkit</title>
+<style>
+/* ============ RESET & THEME ============ */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#e4e9f0;
+  --sh-dark:#b8c2d1;
+  --sh-light:#ffffff;
+  --text:#3a4657;
+  --muted:#7b8798;
+  --accent:#5b7cfa;
+  --danger:#d96b6b;
+  --ok:#3fa88a;
+  --r:16px;
+}
+html[data-theme="dark"]{
+  --bg:#2a2e36;
+  --sh-dark:#1d2027;
+  --sh-light:#373c46;
+  --text:#ccd6e3;
+  --muted:#8a95a6;
+  --accent:#7c9bff;
+  --danger:#e07b7b;
+  --ok:#4fc0a0;
+}
+html,body{min-height:100%}
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,'Noto Sans Devanagari','Nirmala UI',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding:0 0 70px;
+  transition:background .35s ease,color .35s ease;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+/* ============ NEUMORPHIC PRIMITIVES ============ */
+.neu{background:var(--bg);box-shadow:8px 8px 18px var(--sh-dark),-8px -8px 18px var(--sh-light)}
+.neu-s{background:var(--bg);box-shadow:5px 5px 12px var(--sh-dark),-5px -5px 12px var(--sh-light)}
+.neu-in{background:var(--bg);box-shadow:inset 5px 5px 11px var(--sh-dark),inset -5px -5px 11px var(--sh-light)}
+.rounded{border-radius:var(--r)}
+
+/* ============ HEADER ============ */
+header{padding:30px 0 20px}
+.brand{display:flex;align-items:center;gap:16px}
+.logo{
+  width:58px;height:58px;border-radius:18px;display:grid;place-items:center;
+  font-size:26px;background:var(--bg);
+  box-shadow:6px 6px 14px var(--sh-dark),-6px -6px 14px var(--sh-light);
+  flex:0 0 auto;
+}
+.brand h1{font-family:'Consolas','SF Mono','Fira Code',monospace;font-size:22px;letter-spacing:1px;font-weight:500;text-transform:lowercase}
+.brand p{font-size:13px;color:var(--muted);margin-top:3px}
+.spacer{flex:1}
+.theme-btn{
+  width:52px;height:52px;border-radius:50%;border:0;cursor:pointer;
+  background:var(--bg);color:var(--text);font-size:20px;
+  box-shadow:5px 5px 12px var(--sh-dark),-5px -5px 12px var(--sh-light);
+  transition:all .2s;
+}
+.theme-btn:active{box-shadow:inset 4px 4px 9px var(--sh-dark),inset -4px -4px 9px var(--sh-light)}
+
+/* ============ TABS ============ */
+.tabs{
+  display:flex;gap:10px;padding:10px;border-radius:22px;margin:8px 0 26px;
+  flex-wrap:wrap;
+}
+.tab{
+  flex:1 1 200px;border:0;cursor:pointer;font:inherit;font-weight:600;font-size:14.5px;
+  padding:15px 14px;border-radius:16px;color:var(--muted);background:var(--bg);
+  transition:all .22s ease;display:flex;align-items:center;justify-content:center;gap:9px;
+}
+.tab:hover{color:var(--text)}
+.tab.active{
+  color:var(--accent);
+  box-shadow:inset 5px 5px 11px var(--sh-dark),inset -5px -5px 11px var(--sh-light);
+}
+
+/* ============ PANELS ============ */
+.panel{display:none}
+.panel.active{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ============ CARD ============ */
+.card{border-radius:20px;padding:24px;margin-bottom:24px}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.card-head h2{font-size:16.5px;font-weight:700;display:flex;align-items:center;gap:9px}
+.hint{font-size:12px;color:var(--muted);font-weight:500}
+
+/* ============ FORM ELEMENTS ============ */
+input[type=text],input[type=url],input[type=number],textarea,select{
+  width:100%;border:0;outline:0;font:inherit;font-size:14px;color:var(--text);
+  background:var(--bg);border-radius:14px;padding:13px 16px;
+  box-shadow:inset 5px 5px 11px var(--sh-dark),inset -5px -5px 11px var(--sh-light);
+  transition:box-shadow .2s;
+}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+select{cursor:pointer;appearance:none;background-image:none}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:8px;padding-left:4px}
+
+/* ============ BUTTONS ============ */
+.btn{
+  border:0;cursor:pointer;font:inherit;font-weight:600;font-size:13.5px;
+  padding:13px 20px;border-radius:14px;color:var(--text);background:var(--bg);
+  box-shadow:5px 5px 12px var(--sh-dark),-5px -5px 12px var(--sh-light);
+  transition:all .18s ease;white-space:nowrap;
+}
+.btn:hover{color:var(--accent);transform:translateY(-1px)}
+.btn:active{transform:translateY(0);box-shadow:inset 4px 4px 9px var(--sh-dark),inset -4px -4px 9px var(--sh-light)}
+.btn.primary{color:var(--accent)}
+.btn.danger:hover{color:var(--danger)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+
+/* ============ DROP ZONE ============ */
+.drop{
+  border-radius:20px;padding:44px 22px;text-align:center;cursor:pointer;
+  transition:all .25s ease;
+  box-shadow:inset 7px 7px 16px var(--sh-dark),inset -7px -7px 16px var(--sh-light);
+}
+.drop:hover,.drop.drag{box-shadow:inset 4px 4px 10px var(--sh-dark),inset -4px -4px 10px var(--sh-light)}
+.drop .ico{font-size:44px;display:block;margin-bottom:14px;opacity:.8}
+.drop h3{font-size:15.5px;font-weight:700;margin-bottom:7px}
+.drop p{font-size:12.5px;color:var(--muted)}
+.drop.drag h3{color:var(--accent)}
+
+/* ============ TABLE ============ */
+.tbl-wrap{border-radius:16px;overflow:hidden;margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:13.2px}
+th,td{text-align:left;padding:12px 16px;vertical-align:top}
+th{
+  font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);
+  font-weight:700;background:var(--bg);
+  box-shadow:inset 0 -3px 7px -4px var(--sh-dark);
+}
+td:first-child{font-weight:600;width:38%;color:var(--text)}
+td:last-child{color:var(--muted);word-break:break-word;font-family:'Consolas','SF Mono',monospace;font-size:12.3px}
+tbody tr{box-shadow:inset 0 -2px 6px -5px var(--sh-dark)}
+tbody tr:hover{background:rgba(128,150,190,.06)}
+.grp-title{
+  margin:22px 0 10px;font-size:12px;font-weight:800;letter-spacing:1px;
+  text-transform:uppercase;color:var(--accent);padding-left:4px;
+}
+
+/* ============ STAT CHIPS ============ */
+.stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px}
+.stat{
+  flex:1 1 150px;border-radius:16px;padding:16px 18px;
+  box-shadow:inset 4px 4px 10px var(--sh-dark),inset -4px -4px 10px var(--sh-light);
+}
+.stat .k{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700}
+.stat .v{font-size:17px;font-weight:700;margin-top:6px;word-break:break-all}
+.stat .v.good{color:var(--ok)}
+.stat .v.bad{color:var(--danger)}
+
+/* ============ CODE PANEL ============ */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:920px){.grid2{grid-template-columns:1fr}}
+#codeInput{
+  height:420px;resize:vertical;font-family:'Consolas','SF Mono','Fira Code',monospace;
+  font-size:13px;line-height:1.65;white-space:pre;overflow:auto;
+}
+#preview{
+  width:100%;height:420px;border:0;border-radius:16px;background:#fff;
+  box-shadow:inset 5px 5px 11px var(--sh-dark),inset -5px -5px 11px var(--sh-light);
+}
+html[data-theme="dark"] #preview{background:#1b1e24}
+
+/* ============ OSINT ============ */
+.tool{border-radius:20px;padding:22px;margin-bottom:22px}
+.tool h3{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:9px}
+.tool .inrow{display:flex;gap:12px;flex-wrap:wrap}
+.tool .inrow > *{flex:1 1 200px}
+.out{
+  margin-top:16px;border-radius:14px;padding:16px;font-size:12.8px;
+  font-family:'Consolas','SF Mono',monospace;line-height:1.75;
+  white-space:pre-wrap;word-break:break-word;max-height:340px;overflow:auto;
+  box-shadow:inset 5px 5px 11px var(--sh-dark),inset -5px -5px 11px var(--sh-light);
+  display:none;
+}
+.out.show{display:block}
+.out .k{color:var(--accent);font-weight:700}
+.out .err{color:var(--danger)}
+.out .ok{color:var(--ok)}
+.links{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.link{
+  font-size:12.5px;font-weight:600;text-decoration:none;color:var(--text);
+  padding:9px 15px;border-radius:11px;background:var(--bg);
+  box-shadow:4px 4px 9px var(--sh-dark),-4px -4px 9px var(--sh-light);
+  transition:all .16s;
+}
+.link:hover{color:var(--accent);transform:translateY(-2px)}
+.link:active{box-shadow:inset 3px 3px 7px var(--sh-dark),inset -3px -3px 7px var(--sh-light);transform:none}
+
+/* ============ MISC ============ */
+.spin{display:inline-block;width:14px;height:14px;border-radius:50%;
+  border:2px solid var(--muted);border-top-color:transparent;animation:sp .7s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:46px 20px;color:var(--muted);font-size:13.5px}
+.empty .ico{font-size:40px;display:block;margin-bottom:12px;opacity:.55}
+#toast{
+  position:fixed;left:50%;bottom:32px;transform:translate(-50%,140%);
+  padding:14px 26px;border-radius:16px;font-size:13.5px;font-weight:600;
+  background:var(--bg);color:var(--text);z-index:9999;pointer-events:none;
+  box-shadow:7px 7px 18px var(--sh-dark),-7px -7px 18px var(--sh-light);
+  transition:transform .38s cubic-bezier(.2,.9,.3,1.3);
+}
+#toast.show{transform:translate(-50%,0)}
+footer{text-align:center;color:var(--muted);font-size:12.5px;padding:38px 20px 0;line-height:1.9}
+.social-row{display:flex;justify-content:center;gap:16px;margin-top:20px}
+.social-btn{
+  width:52px;height:52px;border-radius:50%;display:grid;place-items:center;
+  font-size:22px;background:var(--bg);color:var(--text);text-decoration:none;
+  box-shadow:5px 5px 12px var(--sh-dark),-5px -5px 12px var(--sh-light);
+  transition:all .18s ease;
+}
+.social-btn:hover{color:var(--accent);transform:translateY(-3px)}
+.social-btn:active{box-shadow:inset 4px 4px 9px var(--sh-dark),inset -4px -4px 9px var(--sh-light);transform:none}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--sh-dark);border-radius:10px;border:2px solid var(--bg)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ================= HEADER ================= -->
+  <header>
+    <div class="brand">
+      <div class="logo">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 6L10 12L4 18" stroke="var(--text)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="12" y1="18" x2="20" y2="18" stroke="var(--text)" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <h1>glsorun</h1>
+        <p>Image Metadata Cleaner • Live Code Playground • OSINT Tools</p>
+      </div>
+      <div class="spacer"></div>
+      <button class="theme-btn" id="themeBtn" title="Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <!-- ================= TABS ================= -->
+  <nav class="tabs neu">
+    <button class="tab active" data-panel="meta">🖼️ Image Metadata</button>
+    <button class="tab" data-panel="code">💻 Code + Preview</button>
+    <button class="tab" data-panel="osint">🔎 OSINT Tools</button>
+  </nav>
+
+  <!-- ============================================================
+       PANEL 1 : IMAGE METADATA
+  ============================================================= -->
+  <section id="panel-meta" class="panel active">
+
+    <div class="card neu">
+      <div class="card-head">
+        <h2>📤 Upload Image</h2>
+        <span class="hint">JPEG • PNG • WEBP • HEIC • GIF — everything is processed right in your browser</span>
+      </div>
+
+      <div class="drop" id="dropZone">
+        <span class="ico">🖼️</span>
+        <h3>Drop an image here or click to select</h3>
+        <p>The file is never sent to any server — 100% local processing</p>
+      </div>
+      <input type="file" id="fileInput" accept="image/*" hidden>
+    </div>
+
+    <div id="metaResult"></div>
+
+    <!-- REMOVE / DOWNLOAD -->
+    <div class="card neu" id="cleanCard" style="display:none">
+      <div class="card-head">
+        <h2>🧹 Remove Metadata and Download</h2>
+        <span class="hint">The cleaned image will have no EXIF / GPS / camera information</span>
+      </div>
+
+      <div class="grid2">
+        <div>
+          <div class="field">
+            <label>Output Format</label>
+            <select id="cleanMode">
+              <option value="lossless">🔒 Lossless JPEG Strip — quality stays exactly the same (JPEG only)</option>
+              <option value="image/jpeg">🖼️ JPEG (Re-encode)</option>
+              <option value="image/png">🖼️ PNG (Lossless)</option>
+              <option value="image/webp">🖼️ WEBP (Smaller size)</option>
+            </select>
+          </div>
+          <div class="field" id="qualityField">
+            <label>Quality — <span id="qVal">92</span>%</label>
+            <input type="range" id="quality" min="30" max="100" value="92" style="width:100%">
+          </div>
+          <div class="row">
+            <button class="btn primary" id="btnClean">🧹 Remove Metadata</button>
+            <button class="btn" id="btnDownloadClean" disabled>⬇️ Download Clean Image</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="stats">
+            <div class="stat">
+              <div class="k">Original Size</div>
+              <div class="v" id="sizeBefore">—</div>
+            </div>
+            <div class="stat">
+              <div class="k">Clean Size</div>
+              <div class="v" id="sizeAfter">—</div>
+            </div>
+          </div>
+          <div class="stats">
+            <div class="stat">
+              <div class="k">Status</div>
+              <div class="v" id="cleanStatus">Waiting…</div>
+            </div>
+          </div>
+          <div style="margin-top:16px;border-radius:16px;padding:14px 16px;font-size:12.3px;color:var(--muted);line-height:1.75;
+               box-shadow:inset 4px 4px 10px var(--sh-dark),inset -4px -4px 10px var(--sh-light)">
+            <b style="color:var(--text)">Which mode to choose?</b><br>
+            • <b>Lossless Strip</b> — best option. Pixels don't change at all, only metadata blocks are removed.<br>
+            • <b>Re-encode</b> — for PNG/WEBP or when you need to change the format.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============================================================
+       PANEL 2 : CODE + PREVIEW + DOWNLOAD
+  ============================================================= -->
+  <section id="panel-code" class="panel">
+
+    <div class="grid2">
+
+      <div class="card neu">
+        <div class="card-head">
+          <h2>💻 Code Editor</h2>
+          <span class="hint">HTML / CSS / JS — live render</span>
+        </div>
+        <textarea id="codeInput" spellcheck="false" placeholder="Write or paste your HTML code here…
+
+Example:
+<h1>Hello World</h1>
+<style>h1{color:#5b7cfa}</style>"></textarea>
+        <div class="row">
+          <button class="btn primary" id="btnRun">▶️ Run</button>
+          <button class="btn" id="btnSample">✨ Load Sample</button>
+          <button class="btn danger" id="btnClear">🗑️ Clear</button>
+        </div>
+      </div>
+
+      <div class="card neu">
+        <div class="card-head">
+          <h2>👁️ Live Preview</h2>
+          <span class="hint" id="previewStatus">Ready</span>
+        </div>
+        <iframe id="preview" sandbox="allow-scripts allow-modals allow-forms allow-popups allow-pointer-lock"></iframe>
+        <div class="row">
+          <button class="btn primary" data-dl="html">⬇️ HTML</button>
+          <button class="btn primary" data-dl="pdf">⬇️ PDF</button>
+          <button class="btn primary" data-dl="txt">⬇️ TXT</button>
+          <button class="btn primary" data-dl="xls">⬇️ XLS</button>
+          <button class="btn primary" data-dl="zip">⬇️ ZIP</button>
+        </div>
+        <div class="hint" style="margin-top:12px;line-height:1.8">
+          <b>ZIP</b> contains: <code>index.html</code>, separate <code>style.css</code> and <code>script.js</code> (if present), <code>code.txt</code>, <code>README.txt</code>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PANEL 3 : OSINT TOOLS
+  ============================================================= -->
+  <section id="panel-osint" class="panel">
+
+    <!-- 1. IP / DOMAIN -->
+    <div class="tool neu">
+      <h3>🌐 IP / Domain Lookup</h3>
+      <div class="inrow">
+        <input type="text" id="ipInput" placeholder="8.8.8.8  or  example.com">
+        <button class="btn primary" id="ipBtn" style="flex:0 0 auto">Check</button>
+      </div>
+      <div class="out" id="ipOut"></div>
+    </div>
+
+    <!-- 2. DNS -->
+    <div class="tool neu">
+      <h3>📡 DNS Records (Cloudflare DoH)</h3>
+      <div class="inrow">
+        <input type="text" id="dnsInput" placeholder="example.com">
+        <select id="dnsType" style="flex:0 0 140px">
+          <option>A</option><option>AAAA</option><option>MX</option>
+          <option>TXT</option><option>NS</option><option>CNAME</option>
+          <option>SOA</option><option>CAA</option><option>ANY</option>
+        </select>
+        <button class="btn primary" id="dnsBtn" style="flex:0 0 auto">Search</button>
+      </div>
+      <div class="out" id="dnsOut"></div>
+    </div>
+
+    <!-- 3. WHOIS / RDAP -->
+    <div class="tool neu">
+      <h3>📋 WHOIS / RDAP Domain Info</h3>
+      <div class="inrow">
+        <input type="text" id="whoisInput" placeholder="example.com">
+        <button class="btn primary" id="whoisBtn" style="flex:0 0 auto">View</button>
+      </div>
+      <div class="out" id="whoisOut"></div>
+    </div>
+
+    <!-- 4. USERNAME -->
+    <div class="tool neu">
+      <h3>👤 Username Scanner (Profile Link Generator)</h3>
+      <div class="inrow">
+        <input type="text" id="unameInput" placeholder="username">
+        <button class="btn primary" id="unameBtn" style="flex:0 0 auto">Generate Links</button>
+      </div>
+      <div class="out show" id="unameOut" style="display:none">
+        <div style="color:var(--muted)">Links will appear below once generated. <b>Note:</b> auto-check isn't possible due to CORS — click the links to verify manually.</div>
+      </div>
+      <div class="links" id="unameLinks"></div>
+    </div>
+
+    <!-- 5. EMAIL -->
+    <div class="tool neu">
+      <h3>📧 Email Recon</h3>
+      <div class="inrow">
+        <input type="text" id="emailInput" placeholder="someone@example.com">
+        <button class="btn primary" id="emailBtn" style="flex:0 0 auto">Check</button>
+      </div>
+      <div class="out" id="emailOut"></div>
+      <div class="links" id="emailLinks"></div>
+    </div>
+
+    <!-- 6. HASH -->
+    <div class="tool neu">
+      <h3>#️⃣ Hash Generator</h3>
+      <div class="field">
+        <textarea id="hashInput" rows="3" placeholder="Type text here…"></textarea>
+      </div>
+      <div class="row" style="margin-top:0">
+        <button class="btn primary" id="hashBtn">Generate Hash</button>
+      </div>
+      <div class="out" id="hashOut"></div>
+    </div>
+
+    <!-- 7. ENCODE / DECODE -->
+    <div class="tool neu">
+      <h3>🔐 Encoder / Decoder</h3>
+      <div class="field">
+        <textarea id="encInput" rows="3" placeholder="Text or encoded string…"></textarea>
+      </div>
+      <div class="inrow" style="margin-bottom:12px">
+        <select id="encMode">
+          <option value="b64e">Base64 Encode</option>
+          <option value="b64d">Base64 Decode</option>
+          <option value="urle">URL Encode</option>
+          <option value="urld">URL Decode</option>
+          <option value="hexe">Hex Encode</option>
+          <option value="hexd">Hex Decode</option>
+          <option value="rot13">ROT13</option>
+          <option value="bin">Text → Binary</option>
+          <option value="rev">Reverse Text</option>
+        </select>
+        <button class="btn primary" id="encBtn" style="flex:0 0 auto">Run</button>
+      </div>
+      <div class="out" id="encOut"></div>
+    </div>
+
+    <!-- 8. WAYBACK -->
+    <div class="tool neu">
+      <h3>🕰️ Wayback Machine Check</h3>
+      <div class="inrow">
+        <input type="text" id="wbInput" placeholder="example.com/page">
+        <button class="btn primary" id="wbBtn" style="flex:0 0 auto">View</button>
+      </div>
+      <div class="out" id="wbOut"></div>
+    </div>
+
+    <!-- 9. REVERSE IMAGE -->
+    <div class="tool neu">
+      <h3>🔍 Reverse Image Search</h3>
+      <div class="inrow">
+        <input type="text" id="imgUrlInput" placeholder="https://example.com/photo.jpg">
+        <button class="btn primary" id="imgUrlBtn" style="flex:0 0 auto">Generate Links</button>
+      </div>
+      <div class="links" id="imgLinks"></div>
+    </div>
+
+    <!-- 10. PHONE -->
+    <div class="tool neu">
+      <h3>📞 Phone Number Recon</h3>
+      <div class="inrow">
+        <input type="text" id="phoneInput" placeholder="+1 555 123 4567">
+        <button class="btn primary" id="phoneBtn" style="flex:0 0 auto">Analyze</button>
+      </div>
+      <div class="out" id="phoneOut"></div>
+      <div class="links" id="phoneLinks"></div>
+    </div>
+
+  </section>
+
+  <footer>
+    🔒 All processing happens in your browser — no file is ever uploaded to any server.<br>
+    OSINT tools use public APIs — for lawful and ethical purposes only.
+    <div class="social-row">
+      <a class="social-btn" href="https://instagram.com/ajtze" target="_blank" rel="noopener" title="Instagram — @ajtze" aria-label="Instagram">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="20" height="20" rx="6" stroke="currentColor" stroke-width="1.8"/>
+          <circle cx="12" cy="12" r="4.4" stroke="currentColor" stroke-width="1.8"/>
+          <circle cx="17.3" cy="6.7" r="1.15" fill="currentColor"/>
+        </svg>
+      </a>
+      <a class="social-btn" href="https://github.com/ajtze" target="_blank" rel="noopener" title="GitHub — @ajtze" aria-label="GitHub">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 .5C5.73.5.5 5.73.5 12.02c0 5.05 3.28 9.33 7.83 10.84.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.11-3.19.69-3.86-1.36-3.86-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.16.08 1.76 1.19 1.76 1.19 1.03 1.75 2.69 1.25 3.34.96.1-.75.4-1.25.73-1.54-2.55-.29-5.23-1.27-5.23-5.68 0-1.25.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 2.9-.39c.98.01 1.97.13 2.9.39 2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.08 0 4.42-2.69 5.39-5.25 5.67.41.36.78 1.05.78 2.11 0 1.53-.01 2.76-.01 3.13 0 .3.21.66.79.55A10.53 10.53 0 0 0 23.5 12c0-6.29-5.23-11.5-11.5-11.5Z"/>
+        </svg>
+      </a>
+    </div>
+  </footer>
+
+</div>
+
+<div id="toast"></div>
+
+<!-- html2pdf (for PDF export, falls back to print dialog on failure) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+/* ============================================================================
+   0. HELPERS
+============================================================================ */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+function toast(msg, ms = 2400) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), ms);
+}
+
+function humanSize(n) {
+  if (n < 1024) return n + ' B';
+  if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1048576).toFixed(2) + ' MB';
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function downloadBlob(blob, filename) {
+  const a = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+/* ============================================================================
+   1. THEME + TABS
+============================================================================ */
+$('#themeBtn').addEventListener('click', () => {
+  const html = document.documentElement;
+  const dark = html.dataset.theme === 'dark';
+  html.dataset.theme = dark ? 'light' : 'dark';
+  $('#themeBtn').textContent = dark ? '🌙' : '☀️';
+});
+
+$$('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    $$('.tab').forEach(t => t.classList.remove('active'));
+    $$('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    $('#panel-' + tab.dataset.panel).classList.add('active');
+  });
+});
+
+/* ============================================================================
+   2. EXIF PARSER (pure JS)
+============================================================================ */
+const EXIF_TAGS = {
+  0x0100:'ImageWidth',0x0101:'ImageHeight',0x0102:'BitsPerSample',0x0103:'Compression',
+  0x0106:'PhotometricInterpretation',0x010E:'ImageDescription',0x010F:'Make',0x0110:'Model',
+  0x0112:'Orientation',0x0115:'SamplesPerPixel',0x011A:'XResolution',0x011B:'YResolution',
+  0x011C:'PlanarConfiguration',0x0128:'ResolutionUnit',0x0131:'Software',0x0132:'DateTime',
+  0x013B:'Artist',0x013E:'WhitePoint',0x013F:'PrimaryChromaticities',
+  0x0201:'ThumbnailOffset',0x0202:'ThumbnailLength',0x0211:'YCbCrCoefficients',
+  0x0212:'YCbCrSubSampling',0x0213:'YCbCrPositioning',0x0214:'ReferenceBlackWhite',
+  0x8298:'Copyright',0x829A:'ExposureTime',0x829D:'FNumber',0x8769:'ExifIFDPointer',
+  0x8822:'ExposureProgram',0x8824:'SpectralSensitivity',0x8825:'GPSInfoIFDPointer',
+  0x8827:'ISOSpeedRatings',0x8828:'OECF',0x8830:'SensitivityType',0x9000:'ExifVersion',
+  0x9003:'DateTimeOriginal',0x9004:'DateTimeDigitized',0x9101:'ComponentsConfiguration',
+  0x9102:'CompressedBitsPerPixel',0x9201:'ShutterSpeedValue',0x9202:'ApertureValue',
+  0x9203:'BrightnessValue',0x9204:'ExposureBiasValue',0x9205:'MaxApertureValue',
+  0x9206:'SubjectDistance',0x9207:'MeteringMode',0x9208:'LightSource',0x9209:'Flash',
+  0x920A:'FocalLength',0x9214:'SubjectArea',0x927C:'MakerNote',0x9286:'UserComment',
+  0x9290:'SubSecTime',0x9291:'SubSecTimeOriginal',0x9292:'SubSecTimeDigitized',
+  0xA000:'FlashpixVersion',0xA001:'ColorSpace',0xA002:'PixelXDimension',0xA003:'PixelYDimension',
+  0xA004:'RelatedSoundFile',0xA005:'InteroperabilityIFDPointer',0xA20E:'FocalPlaneXResolution',
+  0xA20F:'FocalPlaneYResolution',0xA210:'FocalPlaneResolutionUnit',0xA214:'SubjectLocation',
+  0xA215:'ExposureIndex',0xA217:'SensingMethod',0xA300:'FileSource',0xA301:'SceneType',
+  0xA302:'CFAPattern',0xA401:'CustomRendered',0xA402:'ExposureMode',0xA403:'WhiteBalance',
+  0xA404:'DigitalZoomRatio',0xA405:'FocalLengthIn35mmFilm',0xA406:'SceneCaptureType',
+  0xA407:'GainControl',0xA408:'Contrast',0xA409:'Saturation',0xA40A:'Sharpness',
+  0xA40C:'SubjectDistanceRange',0xA420:'ImageUniqueID',0xA430:'CameraOwnerName',
+  0xA431:'BodySerialNumber',0xA432:'LensSpecification',0xA433:'LensMake',0xA434:'LensModel',
+  0xA435:'LensSerialNumber'
+};
+
+const GPS_TAGS = {
+  0:'GPSVersionID',1:'GPSLatitudeRef',2:'GPSLatitude',3:'GPSLongitudeRef',4:'GPSLongitude',
+  5:'GPSAltitudeRef',6:'GPSAltitude',7:'GPSTimeStamp',8:'GPSSatellites',9:'GPSStatus',
+  10:'GPSMeasureMode',11:'GPSDOP',12:'GPSSpeedRef',13:'GPSSpeed',14:'GPSTrackRef',
+  15:'GPSTrack',16:'GPSImgDirectionRef',17:'GPSImgDirection',18:'GPSMapDatum',
+  19:'GPSDestLatitudeRef',20:'GPSDestLatitude',21:'GPSDestLongitudeRef',22:'GPSDestLongitude',
+  23:'GPSDestBearingRef',24:'GPSDestBearing',25:'GPSDestDistanceRef',26:'GPSDestDistance',
+  27:'GPSProcessingMethod',28:'GPSAreaInformation',29:'GPSDateStamp',30:'GPSDifferential'
+};
+
+const FLASH_MAP = {
+  0x0:'Flash did not fire',0x1:'Flash fired',0x5:'Flash fired (no reflection detected)',
+  0x7:'Flash fired (reflection detected)',0x9:'Flash fired, forced',0xD:'Forced, reflection detected',
+  0x10:'Flash off',0x18:'Flash off, auto',0x19:'Flash fired, auto',0x1D:'Flash fired, auto, reflection',
+  0x20:'No flash function',0x41:'Red-eye reduction, flash fired',0x45:'Red-eye, flash fired',
+  0x47:'Red-eye, flash fired, reflection',0x49:'Red-eye, flash, forced',
+  0x4D:'Red-eye, flash, forced, reflection',0x50:'Red-eye, flash off'
+};
+
+const ORIENT_MAP = {
+  1:'Normal (0°)',2:'Mirror horizontal',3:'Rotated 180°',4:'Mirror vertical',
+  5:'Mirror + 90° CW',6:'Rotated 90° CW',7:'Mirror + 90° CCW',8:'Rotated 90° CCW'
+};
+
+function parseExif(buffer) {
+  const dv = new DataView(buffer);
+  const out = { ifd0: {}, exif: {}, gps: {}, gpsRaw: null };
+
+  if (dv.byteLength < 4 || dv.getUint16(0) !== 0xFFD8) return null; // Not JPEG
+
+  let off = 2, tiff = -1;
+  while (off < dv.byteLength - 4) {
+    if (dv.getUint8(off) !== 0xFF) break;
+    const marker = dv.getUint8(off + 1);
+    if (marker === 0xD8 || marker === 0x01 || (marker >= 0xD0 && marker <= 0xD7)) { off += 2; continue; }
+    if (marker === 0xDA || marker === 0xD9) break;
+    const size = dv.getUint16(off + 2);
+    if (marker === 0xE1) {
+      const s = off + 4;
+      if (dv.getUint32(s) === 0x45786966 && dv.getUint16(s + 4) === 0) { tiff = s + 6; break; }
+    }
+    off += 2 + size;
+  }
+  if (tiff < 0) return out;
+
+  const little = dv.getUint16(tiff) === 0x4949;
+  if (dv.getUint16(tiff + 2, little) !== 42) return out;
+
+  const ifd0Off = dv.getUint32(tiff + 4, little);
+
+  function readValue(entryPos) {
+    const type = dv.getUint16(entryPos + 2, little);
+    const count = dv.getUint32(entryPos + 4, little);
+    const sizes = { 1:1,2:1,3:2,4:4,5:8,6:1,7:1,8:2,9:4,10:8,11:4,12:8 };
+    const unit = sizes[type] || 1;
+    const total = unit * count;
+    let p = entryPos + 8;
+    if (total > 4) p = tiff + dv.getUint32(entryPos + 8, little);
+    if (p + total > dv.byteLength) return null;
+
+    try {
+      if (type === 2) {
+        let s = '';
+        for (let i = 0; i < count; i++) {
+          const c = dv.getUint8(p + i);
+          if (c === 0) break;
+          s += String.fromCharCode(c);
+        }
+        return s.trim();
+      }
+      if (type === 3) { const a = []; for (let i = 0; i < count; i++) a.push(dv.getUint16(p + i*2, little)); return count === 1 ? a[0] : a; }
+      if (type === 4) { const a = []; for (let i = 0; i < count; i++) a.push(dv.getUint32(p + i*4, little)); return count === 1 ? a[0] : a; }
+      if (type === 9) { const a = []; for (let i = 0; i < count; i++) a.push(dv.getInt32(p + i*4, little)); return count === 1 ? a[0] : a; }
+      if (type === 5 || type === 10) {
+        const a = [];
+        for (let i = 0; i < count; i++) {
+          const n = type === 5 ? dv.getUint32(p + i*8, little) : dv.getInt32(p + i*8, little);
+          const d = type === 5 ? dv.getUint32(p + i*8 + 4, little) : dv.getInt32(p + i*8 + 4, little);
+          a.push([n, d]);
+        }
+        return count === 1 ? a[0] : a;
+      }
+      // BYTE / UNDEFINED
+      const a = [];
+      for (let i = 0; i < Math.min(count, 32); i++) a.push(dv.getUint8(p + i));
+      return a;
+    } catch (e) { return null; }
+  }
+
+  function walkIFD(offset, map, target) {
+    if (offset <= 0 || tiff + offset >= dv.byteLength) return -1;
+    const count = dv.getUint16(tiff + offset, little);
+    let p = tiff + offset + 2;
+    let nextIFD = -1;
+    let subExif = -1, subGps = -1;
+
+    for (let i = 0; i < count; i++) {
+      const pos = p + i * 12;
+      if (pos + 12 > dv.byteLength) break;
+      const tag = dv.getUint16(pos, little);
+      const val = readValue(pos);
+      const name = map[tag] || ('Tag_0x' + tag.toString(16).toUpperCase());
+
+      if (tag === 0x8769) subExif = val;
+      else if (tag === 0x8825) subGps = val;
+      else if (val !== null && val !== '' && !(Array.isArray(val) && val.length === 0)) {
+        target[name] = { tag, val };
+      }
+      if (i === count - 1) {
+        if (pos + 12 + 4 <= dv.byteLength) nextIFD = dv.getUint32(pos + 12, little);
+      }
+    }
+    return { subExif, subGps, nextIFD };
+  }
+
+  const r0 = walkIFD(ifd0Off, EXIF_TAGS, out.ifd0);
+  if (r0 && r0.subExif > 0) walkIFD(r0.subExif, EXIF_TAGS, out.exif);
+  if (r0 && r0.subGps > 0) {
+    const gres = walkIFD(r0.subGps, GPS_TAGS, out.gps);
+    // Convert GPS to decimal degrees
+    const la = out.gps['GPSLatitude'], lo = out.gps['GPSLongitude'];
+    const laR = out.gps['GPSLatitudeRef'], loR = out.gps['GPSLongitudeRef'];
+    if (la && lo && Array.isArray(la.val) && Array.isArray(lo.val)) {
+      const toDec = (c, ref) => {
+        try {
+          const d = c[0][0] / c[0][1], m = c[1][0] / c[1][1], s = c[2][0] / c[2][1];
+          let dec = d + m / 60 + s / 3600;
+          if (ref === 'S' || ref === 'W') dec = -dec;
+          return dec;
+        } catch (e) { return null; }
+      };
+      const lat = toDec(la.val, laR ? laR.val : 'N');
+      const lon = toDec(lo.val, loR ? loR.val : 'E');
+      if (lat !== null && lon !== null) out.gpsRaw = { lat, lon };
+    }
+  }
+  return out;
+}
+
+/* ---------- PNG text chunks ---------- */
+function parsePngText(buffer) {
+  const dv = new DataView(buffer);
+  const sig = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+  if (dv.byteLength < 8) return null;
+  for (let i = 0; i < 8; i++) if (dv.getUint8(i) !== sig[i]) return null;
+
+  const out = [];
+  let off = 8;
+  const dec = new TextDecoder('latin1');
+  while (off + 12 <= dv.byteLength) {
+    const len = dv.getUint32(off);
+    const type = String.fromCharCode(dv.getUint8(off+4), dv.getUint8(off+5), dv.getUint8(off+6), dv.getUint8(off+7));
+    if (len > dv.byteLength) break;
+
+    if (type === 'tEXt' || type === 'iTXt' || type === 'zTXt') {
+      const data = new Uint8Array(buffer, off + 8, len);
+      let sep = data.indexOf(0);
+      if (sep > 0) {
+        const key = dec.decode(data.slice(0, sep));
+        let value = '';
+        if (type === 'tEXt') {
+          value = dec.decode(data.slice(sep + 1)).replace(/\0+$/, '');
+        } else {
+          const rest = data.slice(sep + 1);
+          const s2 = rest.indexOf(0);
+          const s3 = rest.indexOf(0, s2 + 1);
+          const s4 = rest.indexOf(0, s3 + 1);
+          value = s4 >= 0 ? dec.decode(rest.slice(s4 + 1)) : '(compressed/unreadable)';
+        }
+        if (value) out.push({ key, value });
+      }
+    }
+    off += 12 + len;
+    if (type === 'IEND') break;
+  }
+  return out;
+}
+
+/* ---------- SHA-256 ---------- */
+async function sha256Hex(buffer) {
+  try {
+    const h = await crypto.subtle.digest('SHA-256', buffer);
+    return [...new Uint8Array(h)].map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch (e) { return 'Unavailable (HTTPS required)'; }
+}
+
+/* ---------- JPEG lossless strip ---------- */
+function stripJpeg(buffer) {
+  const b = new Uint8Array(buffer);
+  if (b.length < 4 || b[0] !== 0xFF || b[1] !== 0xD8) return null;
+
+  const keep = [[0, 2]];
+  let i = 2;
+  while (i < b.length - 1) {
+    if (b[i] !== 0xFF) { i++; continue; }
+    const m = b[i + 1];
+    if (m === 0xFF) { i++; continue; }
+    if (m === 0xD8 || m === 0x01 || (m >= 0xD0 && m <= 0xD7)) { keep.push([i, i + 2]); i += 2; continue; }
+    if (m === 0xDA) { keep.push([i, b.length]); i = b.length; break; }
+    if (m === 0xD9) { keep.push([i, i + 2]); i += 2; break; }
+    const len = (b[i + 2] << 8) | b[i + 3];
+    const end = i + 2 + len;
+    if (end > b.length) break;
+    const isMeta = (m >= 0xE0 && m <= 0xEF) || m === 0xFE;
+    if (!isMeta) keep.push([i, end]);
+    i = end;
+  }
+
+  let total = 0;
+  keep.forEach(([s, e]) => total += e - s);
+  const out = new Uint8Array(total);
+  let p = 0;
+  keep.forEach(([s, e]) => { out.set(b.subarray(s, e), p); p += e - s; });
+  return out;
+}
+
+/* ---------- Load image ---------- */
+function loadImage(url) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = rej;
+    img.src = url;
+  });
+}
+
+/* ============================================================================
+   3. SECTION 1 — UI LOGIC
+============================================================================ */
+let currentFile = null;
+let cleanedBlob = null;
+let cleanedName = '';
+
+const dropZone = $('#dropZone');
+const fileInput = $('#fileInput');
+
+dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+['dragenter', 'dragover'].forEach(ev =>
+  dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('drag'); }));
+['dragleave', 'drop'].forEach(ev =>
+  dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove('drag'); }));
+dropZone.addEventListener('drop', e => {
+  const f = e.dataTransfer.files[0];
+  if (f) handleFile(f);
+});
+
+async function handleFile(file) {
+  if (!file.type.startsWith('image/') && !/\.(jpe?g|png|webp|gif|bmp|heic)$/i.test(file.name)) {
+    toast('⚠️ Please select an image file');
+    return;
+  }
+  currentFile = file;
+  cleanedBlob = null;
+  $('#btnDownloadClean').disabled = true;
+  $('#cleanStatus').textContent = 'Waiting…';
+  $('#cleanStatus').className = 'v';
+  $('#sizeAfter').textContent = '—';
+  $('#sizeBefore').textContent = humanSize(file.size);
+
+  const buf = await file.arrayBuffer();
+  const hash = await sha256Hex(buf.slice(0));
+
+  // Dimensions
+  const dims = await new Promise(res => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { res({ w: img.naturalWidth, h: img.naturalHeight }); URL.revokeObjectURL(url); };
+    img.onerror = () => { res(null); URL.revokeObjectURL(url); };
+    img.src = url;
+  });
+
+  const exif = parseExif(buf) || { ifd0: {}, exif: {}, gps: {}, gpsRaw: null };
+  const pngText = parsePngText(buf);
+
+  renderMetadata(file, hash, dims, exif, pngText);
+  $('#cleanCard').style.display = 'block';
+}
+
+function renderMetadata(file, hash, dims, exif, pngText) {
+  const groups = [];
+
+  // --- File info ---
+  const fileRows = [
+    ['File Name', file.name],
+    ['File Type', file.type || 'Unknown'],
+    ['File Size', `${humanSize(file.size)} (${file.size.toLocaleString('en-US')} bytes)`],
+    ['Last Modified', file.lastModified ? new Date(file.lastModified).toLocaleString('en-US') : 'Unknown'],
+    ['Resolution', dims ? `${dims.w} × ${dims.h} px` : 'Unknown'],
+    ['Megapixels', dims ? ((dims.w * dims.h) / 1e6).toFixed(2) + ' MP' : '—'],
+    ['SHA-256', hash]
+  ];
+  groups.push({ title: '📁 File Information', rows: fileRows });
+
+  // --- IFD0 ---
+  const fmtVal = (name, v) => {
+    if (name === 'Orientation' && ORIENT_MAP[v]) return `${v} — ${ORIENT_MAP[v]}`;
+    if (name === 'Flash' && FLASH_MAP[v]) return `${v} — ${FLASH_MAP[v]}`;
+    if (name === 'ExposureTime' && Array.isArray(v)) return v[1] ? `${v[0]}/${v[1]} sec` : `${v[0]}`;
+    if (name === 'FNumber' && Array.isArray(v)) return `f/${(v[0] / v[1]).toFixed(1)}`;
+    if (name === 'FocalLength' && Array.isArray(v)) return `${(v[0] / v[1]).toFixed(1)} mm`;
+    if (name === 'ApertureValue' && Array.isArray(v)) return `${(v[0] / v[1]).toFixed(2)} APEX`;
+    if (name === 'MaxApertureValue' && Array.isArray(v)) return `f/${Math.pow(2, v[0] / v[1] / 2).toFixed(1)}`;
+    if (name === 'ExposureBiasValue' && Array.isArray(v)) return `${(v[0] / v[1]).toFixed(2)} EV`;
+    if (name === 'XResolution' || name === 'YResolution') {
+      if (Array.isArray(v)) return `${v[0]}/${v[1]} dpi`;
+    }
+    if (Array.isArray(v)) {
+      if (v.length && Array.isArray(v[0])) return v.map(p => p[1] ? (p[0] / p[1]).toFixed(4) : p[0]).join(', ');
+      return v.join(', ');
+    }
+    return String(v);
+  };
+
+  const ifdRows = Object.entries(exif.ifd0).map(([k, o]) => [k, fmtVal(k, o.val)]);
+  if (ifdRows.length) groups.push({ title: '🏷️ Image / General Tags', rows: ifdRows });
+
+  const exifRows = Object.entries(exif.exif).map(([k, o]) => [k, fmtVal(k, o.val)]);
+  if (exifRows.length) groups.push({ title: '📷 Camera / Shooting Info', rows: exifRows });
+
+  // --- GPS ---
+  const gpsRows = Object.entries(exif.gps)
+    .filter(([k]) => !['GPSLatitude', 'GPSLongitude'].includes(k))
+    .map(([k, o]) => [k, fmtVal(k, o.val)]);
+  if (exif.gpsRaw) {
+    const { lat, lon } = exif.gpsRaw;
+    gpsRows.unshift(['📍 Coordinates (Decimal)', `${lat.toFixed(6)}, ${lon.toFixed(6)}`]);
+    gpsRows.push(['🗺️ View on Map', `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=16/${lat}/${lon}`]);
+    gpsRows.push(['🌍 Google Maps', `https://maps.google.com/?q=${lat},${lon}`]);
+  }
+  if (gpsRows.length) groups.push({ title: '📍 GPS Location', rows: gpsRows });
+
+  // --- PNG text ---
+  if (pngText && pngText.length) {
+    groups.push({ title: '📝 PNG Text Chunks', rows: pngText.map(t => [t.key, t.value]) });
+  }
+
+  // --- Render ---
+  const hasAny = groups.length > 1 || (groups[0] && groups[0].rows.length);
+  const totalTags = ifdRows.length + exifRows.length + gpsRows.length + (pngText ? pngText.length : 0);
+
+  let html = `
+  <div class="card neu">
+    <div class="card-head">
+      <h2>📊 Metadata Report</h2>
+      <span class="hint">${totalTags} tags found</span>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <div class="k">Metadata Tags</div>
+        <div class="v ${totalTags > 0 ? 'bad' : 'good'}">${totalTags}</div>
+      </div>
+      <div class="stat">
+        <div class="k">GPS Location</div>
+        <div class="v ${exif.gpsRaw ? 'bad' : 'good'}">${exif.gpsRaw ? 'Present ⚠️' : 'None ✅'}</div>
+      </div>
+      <div class="stat">
+        <div class="k">Camera Info</div>
+        <div class="v ${exif.ifd0.Make || exif.ifd0.Model ? 'bad' : 'good'}">${exif.ifd0.Make || exif.ifd0.Model ? 'Present ⚠️' : 'None ✅'}</div>
+      </div>
+      <div class="stat">
+        <div class="k">Timestamp</div>
+        <div class="v ${(exif.ifd0.DateTime || exif.exif.DateTimeOriginal) ? 'bad' : 'good'}">${(exif.ifd0.DateTime || exif.exif.DateTimeOriginal) ? 'Present ⚠️' : 'None ✅'}</div>
+      </div>
+    </div>
+  </div>`;
+
+  if (!totalTags) {
+    html += `<div class="card neu">
+      <div class="empty">
+        <span class="ico">🎉</span>
+        <b style="color:var(--ok);font-size:15px">No metadata found in this image!</b>
+        <p style="margin-top:8px">This image is already clean, or is in a format that doesn't contain EXIF.</p>
+      </div>
+    </div>`;
+  }
+
+  groups.forEach(g => {
+    if (!g.rows.length) return;
+    html += `
+    <div class="card neu">
+      <div class="card-head"><h2>${g.title}</h2><span class="hint">${g.rows.length} entries</span></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            ${g.rows.map(([k, v]) => {
+              const isLink = /^https?:\/\//.test(String(v));
+              const cell = isLink
+                ? `<a href="${escapeHtml(v)}" target="_blank" rel="noopener" style="color:var(--accent)">${escapeHtml(v)}</a>`
+                : escapeHtml(String(v));
+              return `<tr><td>${escapeHtml(k)}</td><td>${cell}</td></tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  });
+
+  $('#metaResult').innerHTML = html;
+}
+
+/* ---------- Cleaning ---------- */
+$('#quality').addEventListener('input', e => $('#qVal').textContent = e.target.value);
+$('#cleanMode').addEventListener('change', e => {
+  const lossless = e.target.value === 'lossless';
+  $('#qualityField').style.display = lossless ? 'none' : 'block';
+});
+
+$('#btnClean').addEventListener('click', async () => {
+  if (!currentFile) return;
+  const mode = $('#cleanMode').value;
+  const status = $('#cleanStatus');
+
+  try {
+    status.textContent = 'Processing…';
+    status.className = 'v';
+    await new Promise(r => setTimeout(r, 30));
+
+    let blob, ext;
+
+    if (mode === 'lossless') {
+      const buf = await currentFile.arrayBuffer();
+      const stripped = stripJpeg(buf);
+      if (!stripped) throw new Error('Lossless strip only works for JPEG. Please choose a different format.');
+      blob = new Blob([stripped], { type: 'image/jpeg' });
+      ext = 'jpg';
+    } else {
+      const url = URL.createObjectURL(currentFile);
+      const img = await loadImage(url);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      if (mode === 'image/jpeg') { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+
+      const q = parseInt($('#quality').value, 10) / 100;
+      blob = await new Promise((res, rej) =>
+        canvas.toBlob(b => b ? res(b) : rej(new Error('Encoding failed')), mode, q));
+      ext = mode.split('/')[1].replace('jpeg', 'jpg');
+    }
+
+    cleanedBlob = blob;
+    const base = currentFile.name.replace(/\.[^.]+$/, '');
+    cleanedName = `${base}_clean.${ext}`;
+
+    $('#sizeAfter').textContent = humanSize(blob.size);
+    $('#btnDownloadClean').disabled = false;
+    status.textContent = 'Ready ✅';
+    status.className = 'v good';
+    toast('✅ Metadata removed — now download it');
+
+  } catch (err) {
+    status.textContent = 'Error ✕';
+    status.className = 'v bad';
+    toast('❌ ' + err.message, 3600);
+  }
+});
+
+$('#btnDownloadClean').addEventListener('click', () => {
+  if (!cleanedBlob) return;
+  downloadBlob(cleanedBlob, cleanedName);
+  toast('⬇️ Download started: ' + cleanedName);
+});
+
+/* ============================================================================
+   4. SECTION 2 — CODE EDITOR + PREVIEW + EXPORTS
+============================================================================ */
+const codeInput = $('#codeInput');
+const preview = $('#preview');
+
+const SAMPLE = `<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body{
+    margin:0;height:100vh;display:grid;place-items:center;
+    font-family:system-ui,sans-serif;
+    background:linear-gradient(135deg,#5b7cfa,#9d7bfa);
+    color:#fff;
+  }
+  .card{
+    background:rgba(255,255,255,.15);
+    backdrop-filter:blur(12px);
+    padding:44px 54px;border-radius:26px;text-align:center;
+    border:1px solid rgba(255,255,255,.3);
+  }
+  h1{margin:0 0 12px;font-size:34px;letter-spacing:.5px}
+  p{margin:0;opacity:.9}
+  button{
+    margin-top:22px;padding:12px 26px;border:0;border-radius:12px;
+    background:#fff;color:#5b7cfa;font-weight:700;font-size:15px;cursor:pointer;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Hello World 👋</h1>
+    <p>This is a live preview. Change the code on the left — it updates instantly.</p>
+    <button onclick="alert('The button works! 🎉')">Click Me</button>
+  </div>
+</body>
+</html>`;
+
+let previewTimer = null;
+
+function runPreview() {
+  const code = codeInput.value;
+  if (!code.trim()) {
+    preview.srcdoc = '<body style="font-family:system-ui;display:grid;place-items:center;height:100vh;color:#8a95a6;font-size:14px">Preview will appear here…</body>';
+    $('#previewStatus').textContent = 'Empty';
+    return;
+  }
+  preview.srcdoc = code;
+  $('#previewStatus').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US');
+}
+
+codeInput.addEventListener('input', () => {
+  $('#previewStatus').textContent = 'Typing…';
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(runPreview, 450);
+});
+
+$('#btnRun').addEventListener('click', () => { runPreview(); toast('▶️ Preview ran'); });
+$('#btnClear').addEventListener('click', () => {
+  codeInput.value = ''; runPreview();
+  $('#previewStatus').textContent = 'Cleared';
+});
+$('#btnSample').addEventListener('click', () => {
+  codeInput.value = SAMPLE; runPreview(); toast('✨ Sample loaded');
+});
+
+/* ---------- Parsing helper ---------- */
+function parseUserCode(code) {
+  let styles = '', scripts = '', body = code, isFullDoc = false;
+  try {
+    const doc = new DOMParser().parseFromString(code, 'text/html');
+    const styleTags = [...doc.querySelectorAll('style')].map(s => s.textContent).join('\n\n');
+    const scriptTags = [...doc.querySelectorAll('script')].map(s => s.textContent).join('\n\n');
+    const hasHtml = /<html|<body|<head/i.test(code);
+    if (hasHtml || styleTags || scriptTags) {
+      styles = styleTags;
+      scripts = scriptTags;
+      body = doc.body ? doc.body.innerHTML : code;
+      isFullDoc = true;
+    }
+  } catch (e) { /* ignore */ }
+  return { styles, scripts, body, isFullDoc };
+}
+
+function buildFullHtml(code) {
+  if (/<html[\s>]/i.test(code)) return code;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GLSORUN Export</title>
+</head>
+<body>
+${code}
+</body>
+</html>`;
+}
+
+/* ---------- DOWNLOAD HANDLERS ---------- */
+$$('[data-dl]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const code = codeInput.value;
+    if (!code.trim()) { toast('⚠️ Write code first'); return; }
+    const type = btn.dataset.dl;
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+
+    try {
+      if (type === 'html') {
+        downloadBlob(new Blob([buildFullHtml(code)], { type: 'text/html;charset=utf-8' }),
+          `code-${stamp}.html`);
+        toast('⬇️ HTML downloaded');
+
+      } else if (type === 'txt') {
+        downloadBlob(new Blob([code], { type: 'text/plain;charset=utf-8' }),
+          `code-${stamp}.txt`);
+        toast('⬇️ TXT downloaded');
+
+      } else if (type === 'xls') {
+        const lines = code.split('\n');
+        const rows = lines.map((l, i) =>
+          `<tr><td>${i + 1}</td><td style="mso-number-format:'\\@'">${escapeHtml(l)}</td></tr>`).join('');
+        const xls = `<html xmlns:x="urn:schemas-microsoft-com:office:excel">
+<head><meta charset="UTF-8">
+<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+<x:Name>Code</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+</head>
+<body>
+<table border="1" cellspacing="0" cellpadding="4">
+<tr><th style="background:#5b7cfa;color:#fff">Line #</th><th style="background:#5b7cfa;color:#fff">Code</th></tr>
+${rows}
+</table>
+</body></html>`;
+        downloadBlob(new Blob(['\ufeff' + xls], { type: 'application/vnd.ms-excel;charset=utf-8' }),
+          `code-${stamp}.xls`);
+        toast('⬇️ XLS downloaded');
+
+      } else if (type === 'zip') {
+        const enc = new TextEncoder();
+        const parsed = parseUserCode(code);
+        const files = [
+          { name: 'index.html', data: enc.encode(buildFullHtml(code)) },
+          { name: 'code.txt', data: enc.encode(code) }
+        ];
+        if (parsed.styles) files.push({ name: 'style.css', data: enc.encode(parsed.styles) });
+        if (parsed.scripts) files.push({ name: 'script.js', data: enc.encode(parsed.scripts) });
+        files.push({
+          name: 'README.txt',
+          data: enc.encode(
+`GLSORUN Toolkit — Code Export
+================================
+Created: ${new Date().toLocaleString('en-US')}
+
+Files:
+- index.html  → full runnable page
+${parsed.styles ? '- style.css   → extracted CSS\n' : ''}${parsed.scripts ? '- script.js   → extracted JavaScript\n' : ''}- code.txt    → as it was in the editor
+
+Usage: open index.html in your browser.
+`)
+        });
+
+        const zipBlob = buildZip(files);
+        downloadBlob(zipBlob, `code-${stamp}.zip`);
+        toast('⬇️ ZIP downloaded (' + files.length + ' files)');
+
+      } else if (type === 'pdf') {
+        await exportPDF(code, stamp);
+      }
+    } catch (err) {
+      console.error(err);
+      toast('❌ Export failed: ' + err.message, 3600);
+    }
+  });
+});
+
+/* ---------- PDF export ---------- */
+async function exportPDF(code, stamp) {
+  const parsed = parseUserCode(code);
+
+  if (typeof html2pdf === 'undefined') {
+    // Fallback — print dialog
+    const w = window.open('', '_blank');
+    if (!w) { toast('❌ Popup was blocked'); return; }
+    w.document.write(buildFullHtml(code));
+    w.document.close();
+    setTimeout(() => { w.focus(); w.print(); }, 600);
+    toast('🖨️ Print dialog opened — choose "Save as PDF"', 4000);
+    return;
+  }
+
+  toast('⏳ Generating PDF…', 5000);
+
+  // Temporary container
+  const holder = document.createElement('div');
+  holder.style.cssText =
+    'position:fixed;left:-10000px;top:0;width:794px;background:#ffffff;color:#1a1a1a;' +
+    'padding:36px;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;';
+  holder.innerHTML = `<style>${parsed.styles || ''}</style>${parsed.body || code}`;
+  document.body.appendChild(holder);
+
+  try {
+    await html2pdf().set({
+      margin: [10, 10, 12, 10],
+      filename: `code-${stamp}.pdf`,
+      image: { type: 'jpeg', quality: 0.96 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    }).from(holder).save();
+    toast('⬇️ PDF downloaded');
+  } catch (e) {
+    toast('❌ Could not generate PDF: ' + e.message, 3600);
+  } finally {
+    holder.remove();
+  }
+}
+
+/* ============================================================================
+   5. PURE-JS ZIP WRITER (STORE method)
+============================================================================ */
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+
+function crc32(u8) {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < u8.length; i++) c = CRC_TABLE[(c ^ u8[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+function buildZip(files) {
+  const parts = [];
+  const central = [];
+  let offset = 0;
+
+  const now = new Date();
+  const dosTime = ((now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1)) & 0xFFFF;
+  const dosDate = (((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate()) & 0xFFFF;
+
+  files.forEach(f => {
+    const nameBytes = new TextEncoder().encode(f.name);
+    const data = f.data;
+    const crc = crc32(data);
+
+    // ---- Local File Header ----
+    const local = new Uint8Array(30 + nameBytes.length);
+    const lv = new DataView(local.buffer);
+    lv.setUint32(0, 0x04034b50, true);
+    lv.setUint16(4, 20, true);          // version needed
+    lv.setUint16(6, 0x0800, true);      // flags (UTF-8)
+    lv.setUint16(8, 0, true);           // compression = store
+    lv.setUint16(10, dosTime, true);
+    lv.setUint16(12, dosDate, true);
+    lv.setUint32(14, crc, true);
+    lv.setUint32(18, data.length, true);
+    lv.setUint32(22, data.length, true);
+    lv.setUint16(26, nameBytes.length, true);
+    lv.setUint16(28, 0, true);
+    local.set(nameBytes, 30);
+
+    parts.push(local, data);
+
+    // ---- Central Directory Header ----
+    const cd = new Uint8Array(46 + nameBytes.length);
+    const cv = new DataView(cd.buffer);
+    cv.setUint32(0, 0x02014b50, true);
+    cv.setUint16(4, 20, true);          // version made by
+    cv.setUint16(6, 20, true);          // version needed
+    cv.setUint16(8, 0x0800, true);      // flags
+    cv.setUint16(10, 0, true);          // compression
+    cv.setUint16(12, dosTime, true);
+    cv.setUint16(14, dosDate, true);
+    cv.setUint32(16, crc, true);
+    cv.setUint32(20, data.length, true);
+    cv.setUint32(24, data.length, true);
+    cv.setUint16(28, nameBytes.length, true);
+    cv.setUint16(30, 0, true);          // extra len
+    cv.setUint16(32, 0, true);          // comment len
+    cv.setUint16(34, 0, true);          // disk start
+    cv.setUint16(36, 0, true);          // internal attrs
+    cv.setUint32(38, 0, true);          // external attrs
+    cv.setUint32(42, offset, true);     // local header offset
+    cd.set(nameBytes, 46);
+    central.push(cd);
+
+    offset += local.length + data.length;
+  });
+
+  const cdSize = central.reduce((a, c) => a + c.length, 0);
+
+  // ---- End of Central Directory ----
+  const eocd = new Uint8Array(22);
+  const ev = new DataView(eocd.buffer);
+  ev.setUint32(0, 0x06054b50, true);
+  ev.setUint16(4, 0, true);
+  ev.setUint16(6, 0, true);
+  ev.setUint16(8, files.length, true);
+  ev.setUint16(10, files.length, true);
+  ev.setUint32(12, cdSize, true);
+  ev.setUint32(16, offset, true);
+  ev.setUint16(20, 0, true);
+
+  return new Blob([...parts, ...central, eocd], { type: 'application/zip' });
+}
+
+/* ============================================================================
+   6. OSINT TOOLS
+============================================================================ */
+function showOut(el, html, isError) {
+  el.innerHTML = isError ? `<span class="err">❌ ${escapeHtml(html)}</span>` : html;
+  el.classList.add('show');
+}
+
+function kv(k, v) {
+  return `<span class="k">${escapeHtml(k)}:</span> ${escapeHtml(String(v))}`;
+}
+
+async function getJSON(url, opts) {
+  const r = await fetch(url, opts);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+/* ---------- 1. IP / Domain ---------- */
+$('#ipBtn').addEventListener('click', async () => {
+  const q = $('#ipInput').value.trim();
+  const out = $('#ipOut');
+  if (!q) { toast('⚠️ Enter an IP or domain'); return; }
+  out.classList.add('show');
+  out.innerHTML = '<span class="spin"></span> Checking…';
+  try {
+    const d = await getJSON('https://ipwho.is/' + encodeURIComponent(q));
+    if (!d.success) throw new Error(d.message || 'Lookup failed');
+    let s = '';
+    s += kv('IP', d.ip) + '\n';
+    s += kv('Type', d.type || '—') + '\n';
+    s += kv('Continent', (d.continent || '—') + ' (' + (d.continent_code || '—') + ')') + '\n';
+    s += kv('Country', `${d.country || '—'} ${d.country_code ? '(' + d.country_code + ')' : ''}`) + '\n';
+    s += kv('State/Province', d.region || '—') + '\n';
+    s += kv('City', d.city || '—') + '\n';
+    s += kv('Zip/Postal Code', d.postal || '—') + '\n';
+    s += kv('Coordinates', `${d.latitude ?? '—'}, ${d.longitude ?? '—'}`) + '\n';
+    if (d.connection) {
+      s += '\n<span class="k">── Connection ──</span>\n';
+      s += kv('ASN', d.connection.asn ?? '—') + '\n';
+      s += kv('ISP', d.connection.isp || '—') + '\n';
+      s += kv('Organization', d.connection.org || '—') + '\n';
+      s += kv('Domain', d.connection.domain || '—') + '\n';
+    }
+    if (d.timezone) {
+      s += '\n<span class="k">── Timezone ──</span>\n';
+      s += kv('Region', d.timezone.id || '—') + '\n';
+      s += kv('Current Time', d.timezone.current_time || '—') + '\n';
+      s += kv('UTC Offset', d.timezone.utc || '—') + '\n';
+    }
+    if (d.latitude && d.longitude) {
+      s += `\n<span class="k">🗺️ Map:</span> https://www.openstreetmap.org/?mlat=${d.latitude}&mlon=${d.longitude}#map=11/${d.latitude}/${d.longitude}\n`;
+    }
+    out.innerHTML = `<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+    out.querySelectorAll('a').forEach(a => a.target = '_blank');
+  } catch (e) {
+    showOut(out, 'Lookup failed: ' + e.message, true);
+  }
+});
+
+/* ---------- 2. DNS ---------- */
+$('#dnsBtn').addEventListener('click', async () => {
+  const name = $('#dnsInput').value.trim();
+  const type = $('#dnsType').value;
+  const out = $('#dnsOut');
+  if (!name) { toast('⚠️ Enter a domain'); return; }
+  out.classList.add('show');
+  out.innerHTML = '<span class="spin"></span> DNS query…';
+  try {
+    const d = await getJSON(
+      `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(name)}&type=${type}`,
+      { headers: { 'Accept': 'application/dns-json' } }
+    );
+    if (!d.Answer && !d.Authority) {
+      showOut(out, 'No records found (Status: ' + (d.Status ?? '?') + ')', true);
+      return;
+    }
+    let s = `<span class="k">Domain:</span> ${escapeHtml(name)}\n`;
+    s += `<span class="k">Type:</span> ${escapeHtml(type)}\n`;
+    s += `<span class="k">Status:</span> ${d.Status === 0 ? '<span class="ok">NOERROR ✅</span>' : 'Code ' + d.Status}\n`;
+    s += `<span class="k">Records found:</span> ${(d.Answer || []).length}\n\n`;
+    (d.Answer || []).forEach((r, i) => {
+      s += `${i + 1}. <span class="k">${escapeHtml(r.name)}</span>\n`;
+      s += `   TTL: ${r.TTL}  |  Type: ${r.type}\n`;
+      s += `   → ${escapeHtml(r.data)}\n\n`;
+    });
+    if (d.Authority && d.Authority.length) {
+      s += `<span class="k">── Authority ──</span>\n`;
+      d.Authority.forEach(r => { s += `${escapeHtml(r.name)} → ${escapeHtml(r.data)}\n`; });
+    }
+    out.innerHTML = `<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+  } catch (e) {
+    showOut(out, 'DNS query failed: ' + e.message, true);
+  }
+});
+
+/* ---------- 3. WHOIS / RDAP ---------- */
+$('#whoisBtn').addEventListener('click', async () => {
+  let d = $('#whoisInput').value.trim().replace(/^https?:\/\//, '').split('/')[0];
+  const out = $('#whoisOut');
+  if (!d) { toast('⚠️ Enter a domain'); return; }
+  out.classList.add('show');
+  out.innerHTML = '<span class="spin"></span> RDAP query…';
+  try {
+    const j = await getJSON('https://rdap.org/domain/' + encodeURIComponent(d));
+    const ev = {};
+    (j.events || []).forEach(e => { ev[e.eventAction] = e.eventDate; });
+    let s = '';
+    s += kv('Domain', j.ldhName || d) + '\n';
+    s += kv('Handle', j.handle || '—') + '\n';
+    s += kv('Status', (j.status || []).join(', ') || '—') + '\n\n';
+    s += '<span class="k">── Dates ──</span>\n';
+    s += kv('Registration', ev.registration ? new Date(ev.registration).toLocaleString('en-US') : '—') + '\n';
+    s += kv('Expiration', ev.expiration ? new Date(ev.expiration).toLocaleString('en-US') : '—') + '\n';
+    s += kv('Last Updated', ev['last changed'] ? new Date(ev['last changed']).toLocaleString('en-US') : '—') + '\n';
+    s += '\n<span class="k">── Nameservers ──</span>\n';
+    (j.nameservers || []).forEach((n, i) => { s += `${i + 1}. ${n.ldhName}\n`; });
+    if (j.entities) {
+      s += '\n<span class="k">── Contacts / Entities ──</span>\n';
+      j.entities.forEach(e => {
+        const roles = (e.roles || []).join(', ');
+        const v = (e.vcardArray && e.vcardArray[1]) || [];
+        const fn = v.find(x => x[0] === 'fn');
+        s += `${roles || 'entity'}: ${fn ? fn[3] : (e.handle || '—')}\n`;
+      });
+    }
+    out.innerHTML = `<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+  } catch (e) {
+    showOut(out, 'RDAP query failed (this TLD may not be supported): ' + e.message, true);
+  }
+});
+
+/* ---------- 4. Username ---------- */
+const USERNAME_SITES = [
+  ['GitHub', 'https://github.com/'],
+  ['X (Twitter)', 'https://x.com/'],
+  ['Instagram', 'https://instagram.com/'],
+  ['Facebook', 'https://facebook.com/'],
+  ['Reddit', 'https://reddit.com/user/'],
+  ['TikTok', 'https://tiktok.com/@'],
+  ['Telegram', 'https://t.me/'],
+  ['YouTube', 'https://youtube.com/@'],
+  ['Pinterest', 'https://pinterest.com/'],
+  ['Snapchat', 'https://snapchat.com/add/'],
+  ['Medium', 'https://medium.com/@'],
+  ['Twitch', 'https://twitch.tv/'],
+  ['Steam', 'https://steamcommunity.com/id/'],
+  ['Spotify', 'https://open.spotify.com/user/'],
+  ['GitLab', 'https://gitlab.com/'],
+  ['Bitbucket', 'https://bitbucket.org/'],
+  ['Keybase', 'https://keybase.io/'],
+  ['About.me', 'https://about.me/'],
+  ['Behance', 'https://behance.net/'],
+  ['Dribbble', 'https://dribbble.com/'],
+  ['SoundCloud', 'https://soundcloud.com/'],
+  ['Vimeo', 'https://vimeo.com/'],
+  ['Flickr', 'https://flickr.com/people/'],
+  ['Dev.to', 'https://dev.to/'],
+  ['Stack Overflow', 'https://stackoverflow.com/users/'],
+  ['HackerNews', 'https://news.ycombinator.com/user?id='],
+  ['Patreon', 'https://patreon.com/'],
+  ['Linktree', 'https://linktr.ee/'],
+  ['Gravatar', 'https://gravatar.com/'],
+  ['Kaggle', 'https://kaggle.com/'],
+  ['Replit', 'https://replit.com/@'],
+  ['Codepen', 'https://codepen.io/']
+];
+
+$('#unameBtn').addEventListener('click', () => {
+  const u = $('#unameInput').value.trim().replace(/^@/, '');
+  if (!u) { toast('⚠️ Enter a username'); return; }
+  const box = $('#unameLinks');
+  box.innerHTML = '';
+  USERNAME_SITES.forEach(([name, base]) => {
+    const a = document.createElement('a');
+    a.className = 'link';
+    a.href = base + encodeURIComponent(u);
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = name;
+    box.appendChild(a);
+  });
+  toast('🔗 ' + USERNAME_SITES.length + ' platform links generated');
+});
+
+/* ---------- 5. Email ---------- */
+$('#emailBtn').addEventListener('click', () => {
+  const email = $('#emailInput').value.trim();
+  const out = $('#emailOut');
+  const links = $('#emailLinks');
+  links.innerHTML = '';
+
+  if (!email) { toast('⚠️ Enter an email'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showOut(out, 'Invalid email format', true);
+    return;
+  }
+
+  const [local, domain] = email.split('@');
+  const hash = md5(email.trim().toLowerCase());
+
+  let s = '';
+  s += kv('Email', email) + '\n';
+  s += kv('Local Part', local) + '\n';
+  s += kv('Domain', domain) + '\n';
+  s += kv('MD5 Hash (Gravatar)', hash) + '\n';
+  s += kv('Gravatar Avatar', `https://www.gravatar.com/avatar/${hash}?d=404`) + '\n';
+  s += kv('Gravatar Profile', `https://gravatar.com/${hash}`) + '\n';
+  s += '\n<span class="k">── Suggestions ──</span>\n';
+  s += '• Guess whether it is a disposable email from the domain\n';
+  s += '• Sign up on Google/GitHub to verify avatar/name\n';
+  s += '• Use the links below for breach checks\n';
+
+  out.innerHTML = `<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+  out.classList.add('show');
+
+  const list = [
+    ['Gravatar Avatar', `https://www.gravatar.com/avatar/${hash}?d=404`],
+    ['Have I Been Pwned', `https://haveibeenpwned.com/account/${encodeURIComponent(email)}`],
+    ['Firefox Monitor', `https://monitor.mozilla.org/`],
+    ['DeHashed', `https://dehashed.com/`],
+    ['IntelX', `https://intelx.io/`],
+    ['Google Search', `https://www.google.com/search?q=${encodeURIComponent('"' + email + '"')}`],
+    ['Epieos', `https://epieos.com/?q=${encodeURIComponent(email)}`],
+    ['Hunter.io', `https://hunter.io/`]
+  ];
+  list.forEach(([n, u]) => {
+    const a = document.createElement('a');
+    a.className = 'link'; a.href = u; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = n;
+    links.appendChild(a);
+  });
+});
+
+/* ---------- 6. Hash ---------- */
+$('#hashBtn').addEventListener('click', async () => {
+  const text = $('#hashInput').value;
+  const out = $('#hashOut');
+  if (!text) { toast('⚠️ Enter some text'); return; }
+  out.classList.add('show');
+  out.innerHTML = '<span class="spin"></span> Generating hashes…';
+
+  const enc = new TextEncoder().encode(text);
+  let s = '';
+  s += kv('Input Length', text.length + ' characters, ' + enc.length + ' bytes') + '\n\n';
+  s += kv('MD5', md5(text)) + '\n';
+
+  try {
+    const algos = [['SHA-1', 'SHA-1'], ['SHA-256', 'SHA-256'], ['SHA-384', 'SHA-384'], ['SHA-512', 'SHA-512']];
+    for (const [label, algo] of algos) {
+      const h = await crypto.subtle.digest(algo, enc);
+      s += kv(label, [...new Uint8Array(h)].map(b => b.toString(16).padStart(2, '0')).join('')) + '\n';
+    }
+  } catch (e) {
+    s += '\n<span class="err">HTTPS is required for SHA hashes.</span>\n';
+  }
+
+  out.innerHTML = `<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+});
+
+/* ---------- 7. Encode / Decode ---------- */
+$('#encBtn').addEventListener('click', () => {
+  const text = $('#encInput').value;
+  const mode = $('#encMode').value;
+  const out = $('#encOut');
+  if (!text) { toast('⚠️ Enter some text'); return; }
+  out.classList.add('show');
+
+  let result = '';
+  try {
+    switch (mode) {
+      case 'b64e':
+        result = btoa(unescape(encodeURIComponent(text))); break;
+      case 'b64d':
+        result = decodeURIComponent(escape(atob(text.trim()))); break;
+      case 'urle':
+        result = encodeURIComponent(text); break;
+      case 'urld':
+        result = decodeURIComponent(text); break;
+      case 'hexe':
+        result = [...new TextEncoder().encode(text)].map(b => b.toString(16).padStart(2, '0')).join(' '); break;
+      case 'hexd': {
+        const clean = text.replace(/[^0-9a-fA-F]/g, '');
+        if (clean.length % 2) throw new Error('Hex length is odd');
+        const bytes = new Uint8Array(clean.match(/.{2}/g).map(h => parseInt(h, 16)));
+        result = new TextDecoder().decode(bytes); break;
+      }
+      case 'rot13':
+        result = text.replace(/[a-zA-Z]/g, c =>
+          String.fromCharCode((c <= 'Z' ? 90 : 122) >= c.charCodeAt(0) + 13
+            ? c.charCodeAt(0) + 13 : c.charCodeAt(0) - 13)); break;
+      case 'bin':
+        result = [...new TextEncoder().encode(text)].map(b => b.toString(2).padStart(8, '0')).join(' '); break;
+      case 'rev':
+        result = [...text].reverse().join(''); break;
+    }
+  } catch (e) {
+    showOut(out, 'Decode failed: ' + e.message, true);
+    return;
+  }
+
+  out.innerHTML = `<pre style="margin:0;white-space:pre-wrap;font:inherit">${escapeHtml(result)}</pre>`;
+});
+
+/* ---------- 8. Wayback ---------- */
+$('#wbBtn').addEventListener('click', async () => {
+  let url = $('#wbInput').value.trim();
+  const out = $('#wbOut');
+  if (!url) { toast('⚠️ Enter a URL'); return; }
+  if (!/^https?:\/\//i.test(url)) url = 'http://' + url;
+
+  out.classList.add('show');
+  out.innerHTML = '<span class="spin"></span> Searching archive…';
+
+  try {
+    const d = await getJSON('https://archive.org/wayback/available?url=' + encodeURIComponent(url));
+    if (!d.archived_snapshots || !d.archived_snapshots.closest) {
+      showOut(out, 'No snapshot found for this URL.', true);
+      return;
+    }
+    const s = d.archived_snapshots.closest;
+    let r = '';
+    r += `<span class="ok">✅ Snapshot found!</span>\n\n`;
+    r += kv('Archive URL', s.url) + '\n';
+    r += kv('Timestamp', s.timestamp) + '\n';
+    r += kv('Status', s.status) + '\n';
+    r += kv('Available', s.available ? 'Yes' : 'No') + '\n';
+    r += `\n<span class="k">Calendar:</span> https://web.archive.org/web/*/${encodeURIComponent(url)}\n`;
+    out.innerHTML = `<pre style="margin:0;white-space:pre-wrap;font:inherit">${r}</pre>`;
+    out.querySelectorAll('a').forEach(a => a.target = '_blank');
+  } catch (e) {
+    showOut(out, 'Search failed: ' + e.message + ' (may be a CORS/network issue)', true);
+  }
+});
+
+/* ---------- 9. Reverse image ---------- */
+$('#imgUrlBtn').addEventListener('click', () => {
+  let u = $('#imgUrlInput').value.trim();
+  if (!u) { toast('⚠️ Enter an image URL'); return; }
+  if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+
+  const e = encodeURIComponent(u);
+  const list = [
+    ['Google Lens', `https://lens.google.com/uploadbyurl?url=${e}`],
+    ['Yandex Images', `https://yandex.com/images/search?rpt=imageview&url=${e}`],
+    ['Bing Visual', `https://www.bing.com/images/search?view=detailv2&iss=sbi&form=SBIVSP&q=imgurl:${e}`],
+    ['TinEye', `https://tineye.com/search?url=${e}`],
+    ['PimEyes', `https://pimeyes.com/en`],
+    ['Baidu Images', `https://graph.baidu.com/upload?image=${e}`],
+    ['Karma Decay', `http://karmadecay.com/search?q=${e}`]
+  ];
+  const box = $('#imgLinks');
+  box.innerHTML = '';
+  list.forEach(([n, url]) => {
+    const a = document.createElement('a');
+    a.className = 'link'; a.href = url; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = n;
+    box.appendChild(a);
+  });
+  toast('🔍 Reverse image search links ready');
+});
+
+/* ---------- 10. Phone ---------- */
+const CC = {
+  '91': 'India 🇮🇳', '1': 'USA/Canada 🇺🇸', '44': 'United Kingdom 🇬🇧', '61': 'Australia 🇦🇺',
+  '92': 'Pakistan 🇵🇰', '880': 'Bangladesh 🇧🇩', '977': 'Nepal 🇳🇵', '94': 'Sri Lanka 🇱🇰',
+  '971': 'UAE 🇦🇪', '966': 'Saudi Arabia 🇸🇦', '86': 'China 🇨🇳', '81': 'Japan 🇯🇵',
+  '82': 'South Korea 🇰🇷', '49': 'Germany 🇩🇪', '33': 'France 🇫🇷', '39': 'Italy 🇮🇹',
+  '34': 'Spain 🇪🇸', '7': 'Russia 🇷🇺', '55': 'Brazil 🇧🇷', '27': 'South Africa 🇿🇦',
+  '65': 'Singapore 🇸🇬', '60': 'Malaysia 🇲🇾', '62': 'Indonesia 🇮🇩', '63': 'Philippines 🇵🇭',
+  '84': 'Vietnam 🇻🇳', '66': 'Thailand 🇹🇭', '90': 'Turkey 🇹🇷', '20': 'Egypt 🇪🇬',
+  '234': 'Nigeria 🇳🇬', '254': 'Kenya 🇰🇪', '64': 'New Zealand 🇳🇿', '353': 'Ireland 🇮🇪'
+};
+
+$('#phoneBtn').addEventListener('click', () => {
+  const raw = $('#phoneInput').value.trim();
+  const out = $('#phoneOut');
+  const links = $('#phoneLinks');
+  links.innerHTML = '';
+
+  if (!raw) { toast('⚠️ Enter a phone number'); return; }
+
+  const digits = raw.replace(/\D/g, '');
+  if (digits.length < 6) { showOut(out, 'Number is too short', true); return; }
+
+  let cc = null, ccName = null;
+  const sorted = Object.keys(CC).sort((a, b) => b.length - a.length);
+  for (const c of sorted) {
+    if (digits.startsWith(c)) { cc = c; ccName = CC[c]; break; }
+  }
+
+  const national = cc ? digits.slice(cc.length) : digits;
+  let s = '';
+  s += kv('Input', raw) + '\n';
+  s += kv('Digits Only', digits) + '\n';
+  s += kv('Length', digits.length + ' digits') + '\n';
+  s += kv('Country Code', cc ? '+' + cc + ' — ' + ccName : 'Could not identify') + '\n';
+  s += kv('National Number', national) + '\n';
+  s += kv('E.164 Format', cc ? '+' + cc + national : '+' + digits) + '\n';
+  s += '\n<span class="k">── Guesses ──</span>\n';
+  s += kv('Type', national.length === 10 ? 'Mobile (10 digits)' : 'Landline/Unknown') + '\n';
+  s += kv('WhatsApp Likelihood', 'High (most mobile numbers)' ) + '\n';
+
+  out.innerHTML = `<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+  out.classList.add('show');
+
+  const e164 = cc ? ('+' + cc + national) : ('+' + digits);
+  const list = [
+    ['WhatsApp', `https://wa.me/${digits}`],
+    ['Telegram', `https://t.me/${e164}`],
+    ['Truecaller', `https://www.truecaller.com/search/in/${digits}`],
+    ['Google Search', `https://www.google.com/search?q=${encodeURIComponent('"' + e164 + '"')}`],
+    ['Facebook Search', `https://www.facebook.com/search/top?q=${encodeURIComponent(e164)}`],
+    ['Sync.me', `https://sync.me/search/?number=${digits}`],
+    ['Numlookup', `https://www.numlookup.com/`],
+    ['SpyDialer', `https://spydialer.com/`]
+  ];
+  list.forEach(([n, u]) => {
+    const a = document.createElement('a');
+    a.className = 'link'; a.href = u; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = n;
+    links.appendChild(a);
+  });
+});
+
+/* ============================================================================
+   7. MD5 (for Gravatar / Hash tool)
+============================================================================ */
+function md5(input) {
+  const bytes = new TextEncoder().encode(input);
+  const len = bytes.length;
+  const bitLen = len * 8;
+  const totalLen = (((len + 8) >> 6) + 1) * 64;
+  const buf = new Uint8Array(totalLen);
+  buf.set(bytes);
+  buf[len] = 0x80;
+  const dv = new DataView(buf.buffer);
+  dv.setUint32(totalLen - 8, bitLen >>> 0, true);
+  dv.setUint32(totalLen - 4, Math.floor(bitLen / 4294967296), true);
+
+  let a0 = 0x67452301, b0 = 0xefcdab89, c0 = 0x98badcfe, d0 = 0x10325476;
+
+  const S = [
+    7,12,17,22, 7,12,17,22, 7,12,17,22, 7,12,17,22,
+    5, 9,14,20, 5, 9,14,20, 5, 9,14,20, 5, 9,14,20,
+    4,11,16,23, 4,11,16,23, 4,11,16,23, 4,11,16,23,
+    6,10,15,21, 6,10,15,21, 6,10,15,21, 6,10,15,21
+  ];
+  const K = new Uint32Array(64);
+  for (let i = 0; i < 64; i++) K[i] = Math.floor(Math.abs(Math.sin(i + 1)) * 4294967296) >>> 0;
+
+  for (let chunk = 0; chunk < totalLen; chunk += 64) {
+    const M = new Uint32Array(16);
+    for (let i = 0; i < 16; i++) M[i] = dv.getUint32(chunk + i * 4, true);
+
+    let A = a0, B = b0, C = c0, D = d0;
+
+    for (let i = 0; i < 64; i++) {
+      let F, g;
+      if (i < 16)      { F = (B & C) | (~B & D);       g = i; }
+      else if (i < 32) { F = (D & B) | (~D & C);       g = (5 * i + 1) % 16; }
+      else if (i < 48) { F = B ^ C ^ D;                g = (3 * i + 5) % 16; }
+      else             { F = C ^ (B | ~D);             g = (7 * i) % 16; }
+
+      F = (F + A + K[i] + M[g]) | 0;
+      A = D; D = C; C = B;
+      B = (B + ((F << S[i]) | (F >>> (32 - S[i])))) | 0;
+    }
+
+    a0 = (a0 + A) | 0;
+    b0 = (b0 + B) | 0;
+    c0 = (c0 + C) | 0;
+    d0 = (d0 + D) | 0;
+  }
+
+  const out = new Uint8Array(16);
+  const ov = new DataView(out.buffer);
+  ov.setUint32(0,  a0 >>> 0, true);
+  ov.setUint32(4,  b0 >>> 0, true);
+  ov.setUint32(8,  c0 >>> 0, true);
+  ov.setUint32(12, d0 >>> 0, true);
+  return [...out].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/* ============================================================================
+   8. INIT
+============================================================================ */
+(function init() {
+  // Preview placeholder
+  preview.srcdoc = `<body style="font-family:system-ui,sans-serif;
+    display:grid;place-items:center;height:100vh;margin:0;
+    background:transparent;color:#8a95a6;font-size:14px;text-align:center;line-height:1.8">
+    <div>
+      <div style="font-size:38px;margin-bottom:10px;opacity:.5">👁️</div>
+      Live preview will appear here<br>
+      <span style="font-size:12px;opacity:.7">Write code in the editor on the left or click "Load Sample"</span>
+    </div>
+  </body>`;
+
+  console.log('%cGLSORUN Toolkit ready ✨', 'color:#5b7cfa;font-weight:700;font-size:14px');
+})();
+</script>
+</body>
+</html>
