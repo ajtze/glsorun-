@@ -1,0 +1,2909 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>glsorun — Privacy-first OSINT Toolkit</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#e4e9f0;--sh-dark:#b8c2d1;--sh-light:#ffffff;
+  --text:#3a4657;--muted:#7b8798;--accent:#5b7cfa;
+  --danger:#d96b6b;--ok:#3fa88a;--warn:#c9922e;--wa:#25D366;
+}
+html[data-theme="dark"]{
+  --bg:#2a2e36;--sh-dark:#1d2027;--sh-light:#373c46;
+  --text:#ccd6e3;--muted:#8a95a6;--accent:#7c9bff;
+  --danger:#e07b7b;--ok:#4fc0a0;--warn:#e0b050;--wa:#3cd673;
+}
+html,body{min-height:100%}
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,'Noto Sans Devanagari',sans-serif;
+  background:var(--bg);color:var(--text);
+  padding:0 0 70px;transition:background .35s,color .35s;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+/* HEADER */
+header{padding:18px 0 16px;position:sticky;top:0;z-index:100;background:var(--bg);box-shadow:0 8px 20px -12px var(--sh-dark)}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:50px;height:50px;border-radius:15px;display:grid;place-items:center;background:var(--bg);box-shadow:5px 5px 12px var(--sh-dark),-5px -5px 12px var(--sh-light);flex:0 0 auto}
+.brand h1{font-family:'Consolas','SF Mono',monospace;font-size:20px;letter-spacing:1px;font-weight:600;text-transform:lowercase}
+.brand p{font-size:12px;color:var(--muted);margin-top:2px}
+.spacer{flex:1}
+.theme-btn{width:46px;height:46px;border-radius:50%;border:0;cursor:pointer;background:var(--bg);color:var(--text);font-size:18px;box-shadow:5px 5px 12px var(--sh-dark),-5px -5px 12px var(--sh-light);transition:all .2s}
+.theme-btn:active{box-shadow:inset 4px 4px 9px var(--sh-dark),inset -4px -4px 9px var(--sh-light)}
+
+/* TABS */
+.tabs{display:flex;gap:8px;padding:8px;border-radius:20px;margin:18px 0 22px;flex-wrap:wrap;background:var(--bg);box-shadow:8px 8px 18px var(--sh-dark),-8px -8px 18px var(--sh-light)}
+.tab{flex:1 1 130px;border:0;cursor:pointer;font:inherit;font-weight:600;font-size:13px;padding:12px 8px;border-radius:14px;color:var(--muted);background:var(--bg);transition:all .22s ease;display:flex;align-items:center;justify-content:center;gap:7px}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);box-shadow:inset 5px 5px 11px var(--sh-dark),inset -5px -5px 11px var(--sh-light)}
+
+/* PANELS */
+.panel{display:none}
+.panel.active{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* CARDS */
+.card{border-radius:20px;padding:22px;margin-bottom:20px;background:var(--bg);box-shadow:8px 8px 18px var(--sh-dark),-8px -8px 18px var(--sh-light);transition:transform .2s}
+.card:hover{transform:translateY(-1px)}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.card-head h2{font-size:15.5px;font-weight:700;display:flex;align-items:center;gap:9px}
+.hint{font-size:11.5px;color:var(--muted);font-weight:500}
+
+/* FORMS */
+input[type=text],input[type=url],input[type=number],input[type=password],textarea,select{
+  width:100%;border:0;outline:0;font:inherit;font-size:14px;color:var(--text);
+  background:var(--bg);border-radius:14px;padding:12px 16px;
+  box-shadow:inset 5px 5px 11px var(--sh-dark),inset -5px -5px 11px var(--sh-light);
+}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+select{cursor:pointer;appearance:none}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:7px;padding-left:4px}
+
+/* BUTTONS */
+.btn{border:0;cursor:pointer;font:inherit;font-weight:600;font-size:13px;padding:12px 18px;border-radius:13px;color:var(--text);background:var(--bg);box-shadow:5px 5px 12px var(--sh-dark),-5px -5px 12px var(--sh-light);transition:all .18s ease;white-space:nowrap}
+.btn:hover{color:var(--accent);transform:translateY(-1px)}
+.btn:active{transform:translateY(0);box-shadow:inset 4px 4px 9px var(--sh-dark),inset -4px -4px 9px var(--sh-light)}
+.btn.primary{color:var(--accent)}
+.btn.danger:hover{color:var(--danger)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+/* DROP */
+.drop{border-radius:18px;padding:38px 20px;text-align:center;cursor:pointer;transition:all .25s ease;box-shadow:inset 7px 7px 16px var(--sh-dark),inset -7px -7px 16px var(--sh-light)}
+.drop:hover,.drop.drag{box-shadow:inset 4px 4px 10px var(--sh-dark),inset -4px -4px 10px var(--sh-light)}
+.drop .ico{font-size:38px;display:block;margin-bottom:12px;opacity:.85}
+.drop h3{font-size:14.5px;font-weight:700;margin-bottom:6px}
+.drop p{font-size:12px;color:var(--muted)}
+.drop.drag h3{color:var(--accent)}
+
+/* TABLE */
+.tbl-wrap{border-radius:14px;overflow:hidden;margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:10px 14px;vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;background:var(--bg);box-shadow:inset 0 -3px 7px -4px var(--sh-dark)}
+td:first-child{font-weight:600;width:38%;color:var(--text)}
+td:last-child{color:var(--muted);word-break:break-word;font-family:'Consolas',monospace;font-size:12px}
+tbody tr{box-shadow:inset 0 -2px 6px -5px var(--sh-dark)}
+tbody tr:hover{background:rgba(128,150,190,.06)}
+
+/* STATS */
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+.stat{flex:1 1 140px;border-radius:14px;padding:14px 16px;box-shadow:inset 4px 4px 10px var(--sh-dark),inset -4px -4px 10px var(--sh-light)}
+.stat .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700}
+.stat .v{font-size:16px;font-weight:700;margin-top:5px;word-break:break-all}
+.stat .v.good{color:var(--ok)}
+.stat .v.bad{color:var(--danger)}
+
+/* CODE */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:920px){.grid2{grid-template-columns:1fr}}
+#codeInput{height:400px;resize:vertical;font-family:'Consolas',monospace;font-size:13px;line-height:1.65;white-space:pre;overflow:auto}
+#preview{width:100%;height:400px;border:0;border-radius:14px;background:#fff;box-shadow:inset 5px 5px 11px var(--sh-dark),inset -5px -5px 11px var(--sh-light)}
+html[data-theme="dark"] #preview{background:#1b1e24}
+
+/* OSINT */
+.tool{border-radius:18px;padding:20px;margin-bottom:18px;background:var(--bg);box-shadow:8px 8px 18px var(--sh-dark),-8px -8px 18px var(--sh-light)}
+.tool h3{font-size:14.5px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+.tool .inrow{display:flex;gap:10px;flex-wrap:wrap}
+.tool .inrow > *{flex:1 1 200px}
+.out{margin-top:14px;border-radius:12px;padding:14px;font-size:12.3px;font-family:'Consolas',monospace;line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:340px;overflow:auto;box-shadow:inset 5px 5px 11px var(--sh-dark),inset -5px -5px 11px var(--sh-light);display:none}
+.out.show{display:block}
+.out .k{color:var(--accent);font-weight:700}
+.out .err{color:var(--danger)}
+.out .ok{color:var(--ok)}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.link{font-size:12px;font-weight:600;text-decoration:none;color:var(--text);padding:8px 13px;border-radius:10px;background:var(--bg);box-shadow:4px 4px 9px var(--sh-dark),-4px -4px 9px var(--sh-light);transition:all .16s}
+.link:hover{color:var(--accent);transform:translateY(-2px)}
+
+/* PILLS */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.pill.found{background:rgba(63,168,138,.16);color:var(--ok)}
+.pill.miss{background:rgba(217,107,107,.14);color:var(--danger)}
+.pill.unk{background:rgba(201,146,46,.16);color:var(--warn)}
+html[data-theme="dark"] .pill.found{background:rgba(79,192,160,.2)}
+html[data-theme="dark"] .pill.miss{background:rgba(224,123,123,.2)}
+html[data-theme="dark"] .pill.unk{background:rgba(224,176,80,.2)}
+
+/* USERNAME */
+.uname-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:10px;margin-top:16px}
+.uname-summary .stat{border-radius:13px;padding:12px 14px;position:relative;overflow:hidden;box-shadow:inset 4px 4px 10px var(--sh-dark),inset -4px -4px 10px var(--sh-light)}
+.uname-summary .stat::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 3px 3px 0;background:var(--muted)}
+.uname-summary .stat.g::before{background:var(--ok)}
+.uname-summary .stat.r::before{background:var(--danger)}
+.uname-summary .stat.y::before{background:var(--warn)}
+.uname-summary .stat.b::before{background:var(--accent)}
+.uname-summary .k{font-size:10px;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.uname-summary .v{font-size:22px;font-weight:800;margin-top:4px;line-height:1}
+.uname-summary .v.g{color:var(--ok)}
+.uname-summary .v.r{color:var(--danger)}
+.uname-summary .v.y{color:var(--warn)}
+.uname-summary .v.b{color:var(--accent)}
+.uname-section{margin-top:14px}
+.uname-section .sh{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;margin-bottom:10px;padding:0 4px}
+.uname-section .sh .dot{width:8px;height:8px;border-radius:50%}
+.uname-section .sh .cnt{color:var(--muted);font-weight:600;font-size:11.5px;padding:2px 9px;border-radius:10px;box-shadow:inset 2px 2px 4px var(--sh-dark),inset -2px -2px 4px var(--sh-light)}
+.uname-section .sh .toggle{margin-left:auto;border:0;background:var(--bg);cursor:pointer;padding:5px 12px;border-radius:10px;font:inherit;font-size:11px;font-weight:700;color:var(--muted);box-shadow:2px 2px 5px var(--sh-dark),-2px -2px 5px var(--sh-light)}
+.uname-section .sh .toggle:hover{color:var(--accent)}
+.uname-section.collapsed .uname-grid{display:none}
+.uname-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:9px}
+.uname-card{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:13px;background:var(--bg);box-shadow:4px 4px 10px var(--sh-dark),-4px -4px 10px var(--sh-light);border-left:3px solid var(--muted);transition:transform .15s}
+.uname-card:hover{transform:translateY(-1px)}
+.uname-card.found{border-left-color:var(--ok)}
+.uname-card.miss{border-left-color:var(--danger);opacity:.75}
+.uname-card.unk{border-left-color:var(--warn)}
+.uname-card.pending{border-left-color:var(--accent);opacity:.85}
+.uname-card .fav{width:30px;height:30px;border-radius:8px;flex-shrink:0;display:grid;place-items:center;overflow:hidden;background:var(--bg);font-size:13px;font-weight:800;color:var(--accent);box-shadow:2px 2px 5px var(--sh-dark),-2px -2px 5px var(--sh-light)}
+.uname-card .fav img{width:18px;height:18px;display:block;border-radius:4px}
+.uname-card .info{flex:1;min-width:0}
+.uname-card .nm{font-size:12.5px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
+.uname-card .nm .star{color:var(--accent);font-size:11px}
+.uname-card .ct{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.uname-card .go{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;text-decoration:none;color:var(--accent);font-size:14px;font-weight:800;box-shadow:2px 2px 6px var(--sh-dark),-2px -2px 6px var(--sh-light);transition:transform .15s}
+.uname-card .go:hover{transform:scale(1.1)}
+.uname-divider{display:flex;align-items:center;gap:12px;margin:20px 0 6px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase}
+.uname-divider::before,.uname-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--sh-dark),transparent)}
+
+/* CHIPS */
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px}
+.chip{border:0;cursor:pointer;font:inherit;font-size:12px;font-weight:600;padding:7px 14px;border-radius:20px;color:var(--muted);background:var(--bg);box-shadow:3px 3px 7px var(--sh-dark),-3px -3px 7px var(--sh-light);transition:color .16s}
+.chip:hover{color:var(--text)}
+.chip.active{color:var(--accent);box-shadow:inset 3px 3px 7px var(--sh-dark),inset -3px -3px 7px var(--sh-light)}
+.progress{height:6px;border-radius:4px;overflow:hidden;background:var(--bg);box-shadow:inset 2px 2px 5px var(--sh-dark),inset -2px -2px 5px var(--sh-light);margin-top:14px;display:none}
+.progress.show{display:block}
+.progress .bar{height:100%;background:var(--accent);width:0;border-radius:4px;transition:width .18s ease}
+.scan-meta{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:8px;font-weight:600;flex-wrap:wrap;gap:8px}
+
+/* GAUGE */
+.gauge{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px 14px;border-radius:16px;box-shadow:inset 6px 6px 14px var(--sh-dark),inset -6px -6px 14px var(--sh-light)}
+.gauge .num{font-size:38px;font-weight:800;letter-spacing:-1px;line-height:1}
+.gauge .unit{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:5px}
+.gauge .lbl{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:9px}
+
+/* STEGANOGRAPHY */
+.stego-modes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:520px){.stego-modes{grid-template-columns:1fr}}
+.stego-mode{border-radius:16px;padding:16px;cursor:pointer;background:var(--bg);box-shadow:5px 5px 12px var(--sh-dark),-5px -5px 12px var(--sh-light);transition:all .2s ease;border:2px solid transparent;text-align:center;position:relative}
+.stego-mode:hover{transform:translateY(-2px)}
+.stego-mode.active{border-color:var(--accent);box-shadow:5px 5px 12px var(--sh-dark),-5px -5px 12px var(--sh-light),0 0 0 3px rgba(91,124,250,.15)}
+.stego-mode .ico{font-size:26px;display:block;margin-bottom:8px}
+.stego-mode .ttl{font-size:14px;font-weight:700;margin-bottom:5px}
+.stego-mode .desc{font-size:11px;color:var(--muted);line-height:1.5}
+.stego-mode.active::after{content:'✓';position:absolute;top:8px;right:10px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+.stego-tabs{display:flex;gap:8px;margin-bottom:16px;padding:6px;border-radius:14px;background:var(--bg);box-shadow:inset 3px 3px 8px var(--sh-dark),inset -3px -3px 8px var(--sh-light)}
+.stego-tab{flex:1;border:0;cursor:pointer;font:inherit;font-size:13px;font-weight:600;padding:10px;border-radius:10px;background:transparent;color:var(--muted);transition:all .2s}
+.stego-tab:hover{color:var(--text)}
+.stego-tab.active{color:#fff;background:var(--accent);box-shadow:0 4px 12px rgba(91,124,250,.3)}
+
+/* PASSWORD */
+.pass-display{font-family:'Consolas',monospace;font-size:18px;font-weight:700;padding:16px;border-radius:14px;text-align:center;word-break:break-all;box-shadow:inset 5px 5px 11px var(--sh-dark),inset -5px -5px 11px var(--sh-light);letter-spacing:1px;margin-top:6px;cursor:pointer;user-select:all}
+.pass-bar{height:8px;border-radius:6px;overflow:hidden;background:var(--bg);box-shadow:inset 2px 2px 5px var(--sh-dark),inset -2px -2px 5px var(--sh-light);margin-top:12px}
+.pass-bar .fill{height:100%;transition:width .3s,background .3s;border-radius:6px}
+.pass-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+@media(max-width:520px){.pass-opts{grid-template-columns:1fr}}
+.pass-opt{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:11px;background:var(--bg);box-shadow:3px 3px 8px var(--sh-dark),-3px -3px 8px var(--sh-light);cursor:pointer;font-size:12.5px;font-weight:600;user-select:none}
+.pass-opt input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+
+/* MISC */
+.spin{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid var(--muted);border-top-color:transparent;animation:sp .7s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:42px 20px;color:var(--muted);font-size:13px}
+.empty .ico{font-size:38px;display:block;margin-bottom:12px;opacity:.55}
+#toast{position:fixed;left:50%;bottom:32px;transform:translate(-50%,140%);padding:13px 24px;border-radius:14px;font-size:13px;font-weight:600;background:var(--bg);color:var(--text);z-index:9999;pointer-events:none;box-shadow:7px 7px 18px var(--sh-dark),-7px -7px 18px var(--sh-light);transition:transform .38s cubic-bezier(.2,.9,.3,1.3);max-width:90vw;text-align:center}
+#toast.show{transform:translate(-50%,0)}
+
+/* SEARCH */
+.search-box{width:100%;border:0;outline:0;font:inherit;font-size:13.5px;color:var(--text);background:var(--bg);border-radius:14px;padding:12px 16px 12px 42px;box-shadow:inset 5px 5px 11px var(--sh-dark),inset -5px -5px 11px var(--sh-light);margin-bottom:16px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%237b8798' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:14px center}
+
+/* FOOTER */
+footer{text-align:center;padding:44px 20px 0;margin-top:16px}
+.foot-inner{max-width:520px;margin:0 auto;padding:28px 22px 22px;border-radius:20px;box-shadow:inset 4px 4px 10px var(--sh-dark),inset -4px -4px 10px var(--sh-light)}
+.foot-brand{font-family:'Consolas',monospace;font-size:19px;letter-spacing:3px;font-weight:600;text-transform:lowercase;color:var(--text);margin-bottom:5px}
+.foot-tag{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:20px;letter-spacing:.3px}
+.foot-info{font-size:12px;color:var(--muted);line-height:1.9;font-weight:500;margin-bottom:20px}
+.foot-info .ic{opacity:.85;margin-right:4px}
+.foot-divider{display:flex;align-items:center;gap:12px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin:6px 0 18px}
+.foot-divider::before,.foot-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--sh-dark),transparent)}
+.social-row{display:flex;justify-content:center;gap:14px;margin-bottom:20px}
+.social-btn{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--bg);color:var(--text);text-decoration:none;box-shadow:5px 5px 12px var(--sh-dark),-5px -5px 12px var(--sh-light);transition:all .18s ease}
+.social-btn svg{width:20px;height:20px;display:block}
+.social-btn:hover{color:var(--accent);transform:translateY(-3px)}
+.social-btn.insta:hover{color:#E1306C}
+.social-btn.wa:hover{color:var(--wa)}
+.social-btn:active{box-shadow:inset 4px 4px 9px var(--sh-dark),inset -4px -4px 9px var(--sh-light);transform:none}
+.foot-copy{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.3px}
+.foot-copy .gname{font-family:'Consolas',monospace;letter-spacing:.5px}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--sh-dark);border-radius:10px;border:2px solid var(--bg)}
+
+/* ARGUS BLOB (shared) */
+.argus-blob{position:relative;width:100%;height:100%;display:grid;place-items:center;overflow:visible}
+.argus-water{position:relative;width:82%;height:82%;transform-origin:center;animation:argusFloat 11s ease-in-out infinite}
+.argus-wash{position:absolute;inset:0;border-radius:61% 39% 56% 44% / 43% 57% 46% 54%;background:radial-gradient(ellipse at 47% 52%,transparent 0 27%,rgba(205,220,230,.14) 35%,rgba(166,190,205,.38) 48%,rgba(143,174,194,.62) 58%,rgba(159,186,201,.46) 67%,rgba(191,209,219,.20) 77%,transparent 88%);filter:blur(1px);animation:argusWash1 12s ease-in-out infinite}
+.argus-wash:nth-child(2){inset:5% -3% 4% 4%;border-radius:43% 57% 48% 52% / 59% 41% 55% 45%;background:radial-gradient(ellipse at 54% 46%,transparent 25%,rgba(183,204,216,.18) 39%,rgba(151,180,198,.48) 55%,rgba(171,196,208,.34) 69%,transparent 85%);filter:blur(2px);animation:argusWash2 15s ease-in-out infinite}
+.argus-wash:nth-child(3){inset:-3% 4% 5% -3%;border-radius:55% 45% 42% 58% / 47% 53% 57% 43%;background:radial-gradient(ellipse at 43% 57%,transparent 30%,rgba(151,181,199,.22) 46%,rgba(135,168,189,.34) 60%,rgba(193,210,220,.15) 76%,transparent 89%);filter:blur(3px);animation:argusWash3 18s ease-in-out infinite}
+.argus-core{position:absolute;width:48%;height:48%;left:26%;top:26%;border-radius:55% 45% 51% 49% / 47% 53% 45% 55%;background:radial-gradient(ellipse,rgba(238,242,246,.96) 0 45%,rgba(220,229,236,.65) 62%,rgba(174,198,212,.14) 82%,transparent 100%);filter:blur(3px);animation:argusCore 8s ease-in-out infinite}
+.argus-highlight{position:absolute;width:55%;height:19%;left:23%;top:28%;border-radius:50%;background:rgba(235,242,247,.28);filter:blur(6px);transform:rotate(-14deg);animation:argusHighlight 7s ease-in-out infinite}
+.argus-spark{position:absolute;width:3px;height:3px;border-radius:50%;background:#e5f1f8;box-shadow:0 0 8px rgba(130,174,202,.9);opacity:0;animation:argusSpark 4.8s ease-in-out infinite}
+.argus-spark.s1{left:17%;top:31%;animation-delay:.2s}
+.argus-spark.s2{left:79%;top:25%;animation-delay:1.4s}
+.argus-spark.s3{left:86%;top:57%;animation-delay:2.7s}
+.argus-spark.s4{left:25%;top:78%;animation-delay:3.5s}
+.argus-spark.s5{left:51%;top:10%;animation-delay:2.1s}
+.argus-spark.s6{left:12%;top:55%;animation-delay:4s}
+.argus-spark.s7{left:70%;top:84%;animation-delay:1s}
+.argus-spark.s8{left:91%;top:42%;animation-delay:3s}
+@keyframes argusFloat{0%,100%{transform:translate(0,0) rotate(-1deg) scale(1)}25%{transform:translate(2px,-1px) rotate(.5deg) scale(1.012)}50%{transform:translate(-1px,2px) rotate(1.5deg) scale(.992)}75%{transform:translate(1px,0) rotate(-.5deg) scale(1.008)}}
+@keyframes argusWash1{0%,100%{border-radius:61% 39% 56% 44% / 43% 57% 46% 54%;transform:rotate(-3deg) scale(1)}50%{border-radius:45% 55% 43% 57% / 56% 44% 58% 42%;transform:rotate(4deg) scale(1.035)}}
+@keyframes argusWash2{0%,100%{transform:translate(0,0) rotate(2deg) scale(1)}50%{transform:translate(-4px,3px) rotate(-4deg) scale(1.045)}}
+@keyframes argusWash3{0%,100%{transform:translate(0,0) rotate(0) scale(1)}50%{transform:translate(4px,-3px) rotate(5deg) scale(1.035)}}
+@keyframes argusCore{0%,100%{transform:scale(.97);opacity:.85}50%{transform:scale(1.045);opacity:1}}
+@keyframes argusHighlight{0%,100%{transform:translate(0,0) rotate(-14deg);opacity:.35}50%{transform:translate(5px,-2px) rotate(-8deg);opacity:.7}}
+@keyframes argusSpark{0%,70%,100%{opacity:0;transform:scale(.15)}79%{opacity:.9;transform:scale(1.5)}88%{opacity:.1;transform:scale(.45)}}
+
+/* ARGUS FAB */
+.argus-fab{position:fixed;right:18px;bottom:20px;z-index:900;width:80px;height:80px;padding:0;border:0;background:transparent;cursor:pointer;border-radius:50%;transition:transform .25s ease}
+.argus-fab:hover{transform:translateY(-3px) scale(1.06)}
+.argus-fab:active{transform:translateY(0) scale(.96)}
+.argus-fab-inner{position:absolute;inset:0;border-radius:50%;display:grid;place-items:center;background:transparent;overflow:visible}
+.argus-fab .argus-blob{width:100%;height:100%}
+.argus-tip{position:fixed;right:110px;bottom:36px;z-index:900;padding:8px 13px;border-radius:13px;font-size:12px;font-weight:600;background:var(--bg);color:var(--text);white-space:nowrap;box-shadow:5px 5px 12px var(--sh-dark),-5px -5px 12px var(--sh-light);opacity:0;transform:translateX(8px);pointer-events:none;transition:opacity .35s,transform .35s}
+.argus-tip.show{opacity:1;transform:none}
+
+/* ARGUS TAB (full page) */
+.argus-page{display:flex;flex-direction:column;height:calc(100vh - 220px);min-height:520px;border-radius:20px;padding:0;background:var(--bg);box-shadow:8px 8px 18px var(--sh-dark),-8px -8px 18px var(--sh-light);overflow:hidden}
+.argus-page .argus-head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(128,150,190,.12)}
+.argus-av{width:52px;height:52px;flex:0 0 auto;border-radius:16px;background:var(--bg);display:grid;place-items:center;overflow:hidden;box-shadow:inset 3px 3px 8px var(--sh-dark),inset -3px -3px 8px var(--sh-light)}
+.argus-av .argus-blob{width:92%;height:92%}
+.argus-ttl{flex:1;min-width:0;line-height:1.3}
+.argus-ttl b{display:block;font-size:15px;letter-spacing:.3px}
+.argus-ttl span{font-size:11.5px;color:var(--muted)}
+.argus-ib{width:34px;height:34px;border:0;border-radius:50%;cursor:pointer;font-size:14px;color:var(--text);background:var(--bg);box-shadow:3px 3px 8px var(--sh-dark),-3px -3px 8px var(--sh-light)}
+.argus-ib:active{box-shadow:inset 2px 2px 6px var(--sh-dark),inset -2px -2px 6px var(--sh-light)}
+.argus-log{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;background:transparent}
+.argus-m{max-width:88%;padding:10px 14px;border-radius:14px;font-size:13.5px;line-height:1.6;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere}
+.argus-m.bot{align-self:flex-start;box-shadow:4px 4px 9px var(--sh-dark),-4px -4px 9px var(--sh-light)}
+.argus-m.user{align-self:flex-end;color:var(--accent);font-weight:600;box-shadow:inset 3px 3px 7px var(--sh-dark),inset -3px -3px 7px var(--sh-light)}
+.argus-m.argus-err{color:var(--danger)}
+.argus-m img{max-width:100%;border-radius:10px;margin-bottom:8px;display:block}
+.argus-m code{font-family:'Consolas',monospace;font-size:12px;padding:1px 6px;border-radius:6px;box-shadow:inset 2px 2px 4px var(--sh-dark),inset -2px -2px 4px var(--sh-light)}
+.argus-m pre{font-family:'Consolas',monospace;font-size:12px;padding:10px 12px;margin:6px 0;border-radius:10px;overflow-x:auto;box-shadow:inset 3px 3px 7px var(--sh-dark),inset -3px -3px 7px var(--sh-light)}
+.argus-chips{display:flex;flex-wrap:wrap;gap:7px}
+.argus-chip,.argus-tool,.argus-explain{border:0;cursor:pointer;font:inherit;font-size:12px;font-weight:600;color:var(--text);padding:8px 13px;border-radius:11px;background:var(--bg);text-align:left;box-shadow:3px 3px 8px var(--sh-dark),-3px -3px 8px var(--sh-light);transition:color .15s}
+.argus-chip:hover,.argus-tool:hover,.argus-explain:hover{color:var(--accent)}
+.argus-tool{display:inline-block;margin-top:8px;color:var(--accent)}
+.argus-explain{display:block;margin-top:12px}
+.argus-form{display:flex;align-items:flex-end;gap:8px;padding:12px 14px 4px;border-top:1px solid rgba(128,150,190,.12)}
+.argus-attach{width:38px;height:38px;flex:0 0 auto;border:0;border-radius:50%;cursor:pointer;font-size:15px;color:var(--muted);background:var(--bg);box-shadow:3px 3px 8px var(--sh-dark),-3px -3px 8px var(--sh-light);transition:color .15s}
+.argus-attach:hover{color:var(--accent)}
+textarea.argus-in{resize:none;max-height:110px;padding:10px 14px;font-size:13.5px;line-height:1.5;overflow-y:auto;flex:1}
+.argus-send{width:42px;height:42px;flex:0 0 auto;border:0;border-radius:50%;cursor:pointer;font-size:16px;color:var(--accent);background:var(--bg);box-shadow:4px 4px 10px var(--sh-dark),-4px -4px 10px var(--sh-light)}
+.argus-send:active{box-shadow:inset 3px 3px 7px var(--sh-dark),inset -3px -3px 7px var(--sh-light)}
+.argus-send:disabled{opacity:.45;cursor:not-allowed}
+.argus-note{padding:4px 16px 12px;font-size:10.5px;line-height:1.5;color:var(--muted);text-align:center}
+.argus-preview{padding:8px 14px 0;display:none;gap:8px;flex-wrap:wrap}
+.argus-preview.show{display:flex}
+.argus-preview .chip-file{position:relative;display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:10px;font-size:11.5px;font-weight:600;background:var(--bg);box-shadow:2px 2px 6px var(--sh-dark),-2px -2px 6px var(--sh-light)}
+.argus-preview .chip-file img{width:28px;height:28px;border-radius:6px;object-fit:cover}
+.argus-preview .chip-file .x{cursor:pointer;color:var(--danger);font-weight:800;margin-left:4px}
+.argus-flash{outline:2px solid transparent;outline-offset:5px;animation:argusflash 1.8s ease}
+@keyframes argusflash{0%,100%{outline-color:transparent}25%,65%{outline-color:var(--accent)}}
+
+/* TOOL COUNTER */
+.tool-count{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:11.5px;font-weight:700;color:var(--accent);background:var(--bg);box-shadow:inset 3px 3px 7px var(--sh-dark),inset -3px -3px 7px var(--sh-light);margin-bottom:14px}
+
+@media (max-width:600px){
+  .wrap{padding:0 14px}
+  .brand h1{font-size:18px}
+  .brand p{font-size:11px}
+  .tab{flex:1 1 calc(50% - 8px);font-size:12px;padding:10px 6px}
+  .argus-fab{width:68px;height:68px;right:12px;bottom:14px}
+  .argus-tip{right:90px;bottom:28px}
+  .argus-page{height:calc(100vh - 200px);min-height:420px}
+}
+@media (prefers-reduced-motion:reduce){
+  .argus-water,.argus-wash,.argus-core,.argus-highlight,.argus-spark{animation:none}
+  .argus-flash{animation:none;outline-color:var(--accent)}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header>
+  <div class="brand">
+    <div class="logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 6L10 12L4 18" stroke="var(--text)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="12" y1="18" x2="20" y2="18" stroke="var(--text)" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <h1>glsorun</h1>
+      <p>Privacy-first OSINT & Utility Toolkit</p>
+    </div>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" title="Toggle theme">🌙</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-panel="image">🖼️ Image</button>
+  <button class="tab" data-panel="code">💻 Code</button>
+  <button class="tab" data-panel="osint">🔎 OSINT</button>
+  <button class="tab" data-panel="utils">🛠️ Utilities</button>
+  <button class="tab" data-panel="argus">🤖 Argus</button>
+</nav>
+
+<!-- ============================================================
+     PANEL 1 — IMAGE
+============================================================ -->
+<section id="panel-image" class="panel active">
+
+  <!-- Metadata Cleaner -->
+  <div class="card">
+    <div class="card-head">
+      <h2>📤 Image Metadata Cleaner</h2>
+      <span class="hint">JPEG • PNG • WEBP • HEIC — 100% local</span>
+    </div>
+    <div class="drop" id="dropZone">
+      <span class="ico">🖼️</span>
+      <h3>Drop an image here or click to select</h3>
+      <p>Your file never leaves this device</p>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" hidden>
+  </div>
+
+  <div id="metaResult"></div>
+
+  <div class="card" id="cleanCard" style="display:none">
+    <div class="card-head"><h2>🧹 Remove Metadata</h2></div>
+    <div class="grid2">
+      <div>
+        <div class="field">
+          <label>Output Format</label>
+          <select id="cleanMode">
+            <option value="lossless">🔒 Lossless JPEG Strip (JPEG only)</option>
+            <option value="image/jpeg">🖼️ JPEG (Re-encode)</option>
+            <option value="image/png">🖼️ PNG (Lossless)</option>
+            <option value="image/webp">🖼️ WEBP (Smaller)</option>
+          </select>
+        </div>
+        <div class="field" id="qualityField">
+          <label>Quality — <span id="qVal">92</span>%</label>
+          <input type="range" id="quality" min="30" max="100" value="92" style="width:100%">
+        </div>
+        <div class="row">
+          <button class="btn primary" id="btnClean">🧹 Remove Metadata</button>
+          <button class="btn" id="btnDownloadClean" disabled>⬇️ Download Clean Image</button>
+        </div>
+      </div>
+      <div>
+        <div class="stats">
+          <div class="stat"><div class="k">Original</div><div class="v" id="sizeBefore">—</div></div>
+          <div class="stat"><div class="k">Clean</div><div class="v" id="sizeAfter">—</div></div>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="k">Status</div><div class="v" id="cleanStatus">Waiting…</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Compressor -->
+  <div class="card">
+    <div class="card-head">
+      <h2>🗜️ Image Compressor</h2>
+      <span class="hint">Reduce file size — 100% local</span>
+    </div>
+    <div class="drop" id="compDrop">
+      <span class="ico">📦</span>
+      <h3>Drop image to compress</h3>
+      <p>JPG • PNG • WEBP</p>
+    </div>
+    <input type="file" id="compInput" accept="image/*" hidden>
+    <div class="field" style="margin-top:14px">
+      <label>Quality — <span id="compQVal">70</span>%</label>
+      <input type="range" id="compQ" min="10" max="100" value="70" style="width:100%">
+    </div>
+    <div class="row">
+      <button class="btn primary" id="compBtn" disabled>🗜️ Compress</button>
+      <button class="btn" id="compDownload" disabled>⬇️ Download</button>
+    </div>
+    <div class="stats" style="margin-top:14px">
+      <div class="stat"><div class="k">Original</div><div class="v" id="compBefore">—</div></div>
+      <div class="stat"><div class="k">Compressed</div><div class="v" id="compAfter">—</div></div>
+      <div class="stat"><div class="k">Saved</div><div class="v" id="compSaved">—</div></div>
+    </div>
+  </div>
+
+  <!-- Exif Timeline Map -->
+  <div class="card">
+    <div class="card-head">
+      <h2>🗺️ EXIF Photo Timeline Map</h2>
+      <span class="hint">Multiple photos → GPS pins on map</span>
+    </div>
+    <div class="drop" id="mapDrop">
+      <span class="ico">📍</span>
+      <h3>Drop multiple photos here</h3>
+      <p>Photos with GPS will appear on the map</p>
+    </div>
+    <input type="file" id="mapInput" accept="image/*" multiple hidden>
+    <div class="out" id="mapOut"></div>
+    <div id="mapContainer" style="height:340px;border-radius:14px;overflow:hidden;margin-top:14px;display:none;box-shadow:inset 5px 5px 11px var(--sh-dark),inset -5px -5px 11px var(--sh-light)"></div>
+  </div>
+
+  <!-- Video Metadata -->
+  <div class="card">
+    <div class="card-head">
+      <h2>🎥 Video Metadata Extractor</h2>
+      <span class="hint">MP4 • WEBM • MOV</span>
+    </div>
+    <div class="drop" id="vidDrop">
+      <span class="ico">🎥</span>
+      <h3>Drop a video here</h3>
+      <p>Duration, codec, resolution, size</p>
+    </div>
+    <input type="file" id="vidInput" accept="video/*" hidden>
+    <div class="out" id="vidOut"></div>
+    <video id="vidPreview" style="display:none;width:100%;max-height:260px;margin-top:12px;border-radius:12px" controls></video>
+  </div>
+
+  <!-- Steganography -->
+  <div class="card">
+    <div class="card-head">
+      <h2>🔐 Image Steganography</h2>
+      <span class="hint">Hide secret text inside any image</span>
+    </div>
+
+    <div class="stego-modes">
+      <div class="stego-mode active" data-mode="secure">
+        <span class="ico">🔒</span>
+        <div class="ttl">Secure Mode</div>
+        <div class="desc">Only glsorun can decode</div>
+      </div>
+      <div class="stego-mode" data-mode="open">
+        <span class="ico">📝</span>
+        <div class="ttl">Open Mode</div>
+        <div class="desc">Any metadata reader can decode</div>
+      </div>
+    </div>
+
+    <div class="hint" id="stegoNote" style="padding:10px 12px;border-radius:12px;line-height:1.6;background:rgba(91,124,250,.08);color:var(--accent);font-weight:600">
+      💡 Recommended: Secure Mode — Your text stays truly private
+    </div>
+
+    <div class="stego-tabs" style="margin-top:14px">
+      <button class="stego-tab active" data-stego-tab="hide">🔒 Hide Text</button>
+      <button class="stego-tab" data-stego-tab="reveal">🔓 Reveal Text</button>
+    </div>
+
+    <div id="stegoHide" style="display:block">
+      <div class="drop" id="stegoDrop">
+        <span class="ico">📤</span>
+        <h3>Upload image (PNG recommended)</h3>
+        <p>Text will be hidden inside</p>
+      </div>
+      <input type="file" id="stegoInput" accept="image/*" hidden>
+      <div class="field" style="margin-top:12px">
+        <label>Secret text to hide</label>
+        <textarea id="stegoText" rows="3" placeholder="Your secret message…"></textarea>
+      </div>
+      <div class="field">
+        <label>Password (optional)</label>
+        <input type="password" id="stegoPass" placeholder="Leave blank for no password">
+      </div>
+      <div class="row">
+        <button class="btn primary" id="stegoHideBtn" disabled>🔒 Hide Text</button>
+        <button class="btn" id="stegoHideDownload" disabled>⬇️ Download Image</button>
+      </div>
+      <div class="out" id="stegoHideOut"></div>
+    </div>
+
+    <div id="stegoReveal" style="display:none">
+      <div class="drop" id="stegoDropReveal">
+        <span class="ico">📥</span>
+        <h3>Upload image with hidden text</h3>
+        <p>Text will be extracted</p>
+      </div>
+      <input type="file" id="stegoInputReveal" accept="image/*" hidden>
+      <div class="field" style="margin-top:12px">
+        <label>Password (if used)</label>
+        <input type="password" id="stegoRevealPass" placeholder="Leave blank if no password">
+      </div>
+      <div class="row">
+        <button class="btn primary" id="stegoRevealBtn" disabled>🔓 Reveal Text</button>
+      </div>
+      <div class="out" id="stegoRevealOut"></div>
+    </div>
+
+    <div class="hint" style="margin-top:12px;line-height:1.6;font-size:11px">
+      ⚠️ For lawful & educational use only. Don't hide illegal content.
+    </div>
+  </div>
+
+</section>
+
+<!-- ============================================================
+     PANEL 2 — CODE
+============================================================ -->
+<section id="panel-code" class="panel">
+  <div class="grid2">
+    <div class="card">
+      <div class="card-head"><h2>💻 Code Editor</h2><span class="hint">HTML / CSS / JS</span></div>
+      <textarea id="codeInput" spellcheck="false" placeholder="Write or paste your HTML code here…"></textarea>
+      <div class="row">
+        <button class="btn primary" id="btnRun">▶️ Run</button>
+        <button class="btn" id="btnSample">✨ Load Sample</button>
+        <button class="btn danger" id="btnClear">🗑️ Clear</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>👁️ Live Preview</h2><span class="hint" id="previewStatus">Ready</span></div>
+      <iframe id="preview" sandbox="allow-scripts allow-modals allow-forms allow-popups allow-pointer-lock"></iframe>
+      <div class="row">
+        <button class="btn primary" data-dl="html">⬇️ HTML</button>
+        <button class="btn primary" data-dl="pdf">⬇️ PDF</button>
+        <button class="btn primary" data-dl="txt">⬇️ TXT</button>
+        <button class="btn primary" data-dl="zip">⬇️ ZIP</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PANEL 3 — OSINT
+============================================================ -->
+<section id="panel-osint" class="panel">
+
+  <div class="tool-count">🔎 <span id="toolCountNum">15</span> OSINT tools available</div>
+  <input type="text" class="search-box" id="osintSearch" placeholder="Search tools… (dns, whois, username…)">
+
+  <div id="osintTools">
+
+  <div class="tool" data-tool="myip">
+    <h3>🛰️ My IP — Your Public Identity</h3>
+    <div class="inrow">
+      <button class="btn primary" id="myIpBtn" style="flex:0 0 auto">🔎 Detect My IP</button>
+      <span class="hint" style="flex:1 1 auto;align-self:center">Your public IP, ISP, approximate location</span>
+    </div>
+    <div class="out" id="myIpOut"></div>
+  </div>
+
+  <div class="tool" data-tool="ipdomain">
+    <h3>🌐 IP / Domain Lookup</h3>
+    <div class="inrow">
+      <input type="text" id="ipInput" placeholder="8.8.8.8  or  example.com">
+      <button class="btn primary" id="ipBtn" style="flex:0 0 auto">Check</button>
+    </div>
+    <div class="out" id="ipOut"></div>
+  </div>
+
+  <div class="tool" data-tool="dns">
+    <h3>📡 DNS Records</h3>
+    <div class="inrow">
+      <input type="text" id="dnsInput" placeholder="example.com">
+      <select id="dnsType" style="flex:0 0 130px">
+        <option>A</option><option>AAAA</option><option>MX</option><option>TXT</option>
+        <option>NS</option><option>CNAME</option><option>SOA</option><option>CAA</option>
+      </select>
+      <button class="btn primary" id="dnsBtn" style="flex:0 0 auto">Search</button>
+    </div>
+    <div class="out" id="dnsOut"></div>
+  </div>
+
+  <div class="tool" data-tool="whois">
+    <h3>📋 WHOIS / RDAP Domain Info</h3>
+    <div class="inrow">
+      <input type="text" id="whoisInput" placeholder="example.com">
+      <button class="btn primary" id="whoisBtn" style="flex:0 0 auto">View</button>
+    </div>
+    <div class="out" id="whoisOut"></div>
+  </div>
+
+  <div class="tool" data-tool="ssl">
+    <h3>🔐 SSL Certificate Info</h3>
+    <div class="inrow">
+      <input type="text" id="sslInput" placeholder="example.com">
+      <button class="btn primary" id="sslBtn" style="flex:0 0 auto">Check</button>
+    </div>
+    <div class="out" id="sslOut"></div>
+  </div>
+
+  <div class="tool" data-tool="techdetect">
+    <h3>🧬 Technology Detector</h3>
+    <div class="inrow">
+      <input type="text" id="techInput" placeholder="example.com">
+      <button class="btn primary" id="techBtn" style="flex:0 0 auto">Detect</button>
+    </div>
+    <div class="out" id="techOut"></div>
+  </div>
+
+  <div class="tool" data-tool="username">
+    <h3>👤 Username Scanner</h3>
+    <div class="inrow">
+      <input type="text" id="unameInput" placeholder="username (without @)">
+      <button class="btn primary" id="unameBtn" style="flex:0 0 auto">Scan →</button>
+    </div>
+    <div class="hint" style="margin-top:10px;line-height:1.7">
+      30 platforms — 11 auto-checked, 19 manual.
+      <span class="pill found">found</span> <span class="pill miss">not found</span> <span class="pill unk">manual</span>
+    </div>
+    <div class="uname-summary" id="unameSummary" style="display:none">
+      <div class="stat g"><div class="k">Found</div><div class="v g" id="statFound">0</div></div>
+      <div class="stat r"><div class="k">Not Found</div><div class="v r" id="statMiss">0</div></div>
+      <div class="stat y"><div class="k">Manual</div><div class="v y" id="statUnk">0</div></div>
+      <div class="stat b"><div class="k">Total</div><div class="v b" id="statTotal">0</div></div>
+    </div>
+    <div class="progress" id="unameProgress"><div class="bar" id="unameBar"></div></div>
+    <div class="scan-meta" id="unameMeta" style="display:none">
+      <span id="unameCounter">0 / 0 checked</span>
+      <span id="unameStats"></span>
+    </div>
+    <div id="unameResults"></div>
+    <div class="row" id="unameActions" style="display:none">
+      <button class="btn primary" id="unameCsv">⬇️ CSV</button>
+      <button class="btn danger" id="unameReset">🗑️ Reset</button>
+    </div>
+    <div class="uname-divider">Advanced — 700+ platforms</div>
+    <div class="row" style="margin-top:0">
+      <button class="btn primary" id="unameAdvancedBtn">📂 Load Directory</button>
+    </div>
+    <div id="unameAdvanced" style="margin-top:12px"></div>
+  </div>
+
+  <div class="tool" data-tool="email">
+    <h3>📧 Email Recon</h3>
+    <div class="inrow">
+      <input type="text" id="emailInput" placeholder="someone@example.com">
+      <button class="btn primary" id="emailBtn" style="flex:0 0 auto">Check</button>
+    </div>
+    <div class="out" id="emailOut"></div>
+    <div class="links" id="emailLinks"></div>
+  </div>
+
+  <div class="tool" data-tool="phone">
+    <h3>📞 Phone Number Recon</h3>
+    <div class="inrow">
+      <input type="text" id="phoneInput" placeholder="+91 98765 43210">
+      <button class="btn primary" id="phoneBtn" style="flex:0 0 auto">Analyze</button>
+    </div>
+    <div class="out" id="phoneOut"></div>
+    <div class="links" id="phoneLinks"></div>
+  </div>
+
+  <div class="tool" data-tool="social">
+    <h3>🕵️ Social Profile Analyzer</h3>
+    <div class="inrow">
+      <input type="text" id="socialInput" placeholder="username (GitHub, Reddit, etc.)">
+      <button class="btn primary" id="socialBtn" style="flex:0 0 auto">Analyze</button>
+    </div>
+    <div class="hint" style="margin-top:10px">Checks public data from GitHub, Reddit, Dev.to, Codeberg, Lichess, Chess.com, npm, HackerNews</div>
+    <div class="out" id="socialOut"></div>
+  </div>
+
+  <div class="tool" data-tool="wayback">
+    <h3>🕰️ Wayback Machine</h3>
+    <div class="inrow">
+      <input type="text" id="wbInput" placeholder="example.com/page">
+      <button class="btn primary" id="wbBtn" style="flex:0 0 auto">View</button>
+    </div>
+    <div class="out" id="wbOut"></div>
+  </div>
+
+  <div class="tool" data-tool="reverse">
+    <h3>🔍 Reverse Image Search</h3>
+    <div class="inrow">
+      <input type="text" id="imgUrlInput" placeholder="https://example.com/photo.jpg">
+      <button class="btn primary" id="imgUrlBtn" style="flex:0 0 auto">Generate</button>
+    </div>
+    <div class="links" id="imgLinks"></div>
+  </div>
+
+  <div class="tool" data-tool="speed">
+    <h3>⚡ Internet Speed Test</h3>
+    <div class="inrow" style="margin-bottom:14px">
+      <select id="speedSize" style="flex:1 1 200px">
+        <option value="5">Quick — 5 MB</option>
+        <option value="10" selected>Standard — 10 MB</option>
+        <option value="25">Thorough — 25 MB</option>
+      </select>
+      <button class="btn primary" id="speedBtn" style="flex:0 0 auto">▶️ Start</button>
+    </div>
+    <div class="progress" id="speedProgress"><div class="bar" id="speedBar"></div></div>
+    <div class="scan-meta" id="speedMeta" style="display:none">
+      <span id="speedStage">Idle</span><span id="speedPercent"></span>
+    </div>
+    <div class="stats" style="margin-top:14px">
+      <div class="gauge"><div class="lbl">Download</div><div class="num" id="dlNum">—</div><div class="unit">Mbps</div></div>
+      <div class="gauge"><div class="lbl">Upload</div><div class="num" id="ulNum">—</div><div class="unit">Mbps</div></div>
+      <div class="gauge"><div class="lbl">Ping</div><div class="num" id="pingNum">—</div><div class="unit">ms</div></div>
+    </div>
+    <div class="out" id="speedOut"></div>
+  </div>
+
+  <div class="tool" data-tool="deepfake">
+    <h3>🎭 AI Image Detector (Deepfake Check)</h3>
+    <div class="hint" style="line-height:1.6;margin-bottom:12px">
+      Basic heuristic check — analyzes image for AI-generation signals.
+      <br><span style="color:var(--warn);font-weight:600">⚠️ Not 100% accurate. For hints only.</span>
+    </div>
+    <div class="drop" id="dfDrop">
+      <span class="ico">🎭</span>
+      <h3>Upload image to analyze</h3>
+      <p>Local analysis — nothing uploaded</p>
+    </div>
+    <input type="file" id="dfInput" accept="image/*" hidden>
+    <div class="out" id="dfOut"></div>
+  </div>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     PANEL 4 — UTILITIES
+============================================================ -->
+<section id="panel-utils" class="panel">
+
+  <div class="tool">
+    <h3>#️⃣ Hash Generator</h3>
+    <div class="field"><textarea id="hashInput" rows="3" placeholder="Type text here…"></textarea></div>
+    <div class="row" style="margin-top:0"><button class="btn primary" id="hashBtn">Generate Hash</button></div>
+    <div class="out" id="hashOut"></div>
+  </div>
+
+  <div class="tool">
+    <h3>🔐 Encoder / Decoder</h3>
+    <div class="field"><textarea id="encInput" rows="3" placeholder="Text or encoded string…"></textarea></div>
+    <div class="inrow" style="margin-bottom:12px">
+      <select id="encMode">
+        <option value="b64e">Base64 Encode</option><option value="b64d">Base64 Decode</option>
+        <option value="urle">URL Encode</option><option value="urld">URL Decode</option>
+        <option value="hexe">Hex Encode</option><option value="hexd">Hex Decode</option>
+        <option value="rot13">ROT13</option><option value="bin">Text → Binary</option>
+        <option value="rev">Reverse Text</option>
+      </select>
+      <button class="btn primary" id="encBtn" style="flex:0 0 auto">Run</button>
+    </div>
+    <div class="out" id="encOut"></div>
+  </div>
+
+  <div class="tool">
+    <h3>🔑 Password Generator</h3>
+    <div class="field">
+      <label>Length — <span id="pwLenVal">16</span></label>
+      <input type="range" id="pwLen" min="4" max="64" value="16" style="width:100%">
+    </div>
+    <div class="pass-opts">
+      <label class="pass-opt"><input type="checkbox" id="pwUpper" checked> Uppercase (A-Z)</label>
+      <label class="pass-opt"><input type="checkbox" id="pwLower" checked> Lowercase (a-z)</label>
+      <label class="pass-opt"><input type="checkbox" id="pwNum" checked> Numbers (0-9)</label>
+      <label class="pass-opt"><input type="checkbox" id="pwSym" checked> Symbols (!@#$…)</label>
+      <label class="pass-opt"><input type="checkbox" id="pwNoSim"> Exclude similar (il1Io0O)</label>
+    </div>
+    <div class="pass-display" id="pwDisplay">Click Generate</div>
+    <div class="pass-bar"><div class="fill" id="pwFill" style="width:0;background:var(--danger)"></div></div>
+    <div class="hint" id="pwStrength" style="margin-top:8px;font-weight:700;color:var(--muted);text-align:center">—</div>
+    <div class="row">
+      <button class="btn primary" id="pwGen">🔄 Generate</button>
+      <button class="btn" id="pwCopy">📋 Copy</button>
+    </div>
+    <div class="hint" style="margin-top:12px;line-height:1.6;font-size:11px;text-align:center">
+      🔒 Generated locally in your browser. Nothing sent to any server.
+    </div>
+  </div>
+
+  <div class="tool">
+    <h3>📱 QR Code Generator</h3>
+    <div class="field">
+      <label>Text or URL</label>
+      <textarea id="qrInput" rows="2" placeholder="https://glsorun.com"></textarea>
+    </div>
+    <div class="field">
+      <label>Size</label>
+      <select id="qrSize">
+        <option value="200">Small (200px)</option>
+        <option value="320" selected>Medium (320px)</option>
+        <option value="480">Large (480px)</option>
+      </select>
+    </div>
+    <div class="row"><button class="btn primary" id="qrGen">📱 Generate QR</button></div>
+    <div id="qrWrap" style="margin-top:14px;display:none;text-align:center">
+      <canvas id="qrCanvas" style="border-radius:12px;background:#fff;padding:10px;box-shadow:inset 4px 4px 10px var(--sh-dark),inset -4px -4px 10px var(--sh-light)"></canvas>
+      <div class="row" style="justify-content:center"><button class="btn" id="qrDl">⬇️ Download</button></div>
+    </div>
+  </div>
+
+  <div class="tool">
+    <h3>🅱️ JSON Formatter / Validator</h3>
+    <div class="field"><textarea id="jsonInput" rows="5" placeholder='{"hello": "world"}'></textarea></div>
+    <div class="row">
+      <button class="btn primary" id="jsonFormat">✨ Format</button>
+      <button class="btn" id="jsonMinify">🗜️ Minify</button>
+      <button class="btn danger" id="jsonClear">🗑️ Clear</button>
+    </div>
+    <div class="out" id="jsonOut"></div>
+  </div>
+
+  <div class="tool">
+    <h3>🎨 Color Picker & Converter</h3>
+    <div class="field">
+      <label>Pick a color</label>
+      <input type="color" id="colorInput" value="#5b7cfa" style="width:100%;height:60px;border:0;border-radius:14px;cursor:pointer;box-shadow:inset 5px 5px 11px var(--sh-dark),inset -5px -5px 11px var(--sh-light)">
+    </div>
+    <div class="stats" style="margin-top:12px">
+      <div class="stat"><div class="k">HEX</div><div class="v" id="hexVal">#5b7cfa</div></div>
+      <div class="stat"><div class="k">RGB</div><div class="v" id="rgbVal">91, 124, 250</div></div>
+      <div class="stat"><div class="k">HSL</div><div class="v" id="hslVal">—</div></div>
+    </div>
+    <div class="row"><button class="btn primary" id="colorCopy">📋 Copy HEX</button></div>
+  </div>
+
+</section>
+
+<!-- ============================================================
+     PANEL 5 — ARGUS
+============================================================ -->
+<section id="panel-argus" class="panel">
+  <div class="argus-page">
+    <div class="argus-head">
+      <div class="argus-av">
+        <div class="argus-blob">
+          <div class="argus-water">
+            <div class="argus-wash"></div><div class="argus-wash"></div><div class="argus-wash"></div>
+            <div class="argus-core"></div><div class="argus-highlight"></div>
+          </div>
+        </div>
+      </div>
+      <div class="argus-ttl"><b>Argus</b><span>Toolkit Assistant</span></div>
+      <button class="argus-ib" id="argusPageClear" title="New chat">🧹</button>
+    </div>
+    <div class="argus-log" id="argusPageLog" aria-live="polite"></div>
+    <div class="argus-preview" id="argusPagePreview"></div>
+    <div class="argus-form">
+      <button class="argus-attach" id="argusPageAttach" title="Attach image or file">📎</button>
+      <input type="file" id="argusPageFile" hidden accept="image/*,.txt,.json,.csv,.md,.log,.html,.xml">
+      <textarea id="argusPageIn" class="argus-in" rows="1" placeholder="Ask Argus anything…"></textarea>
+      <button class="argus-send" id="argusPageSend" title="Send">➤</button>
+    </div>
+    <div class="argus-note">Argus can make mistakes. Never share passwords, OTPs, or personal information. Images/files you send go to AI processing — don't share sensitive data.</div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-brand">glsorun</div>
+    <div class="foot-tag">Privacy-first OSINT & Utility Toolkit</div>
+    <div class="foot-info">
+      <span class="ic">🔒</span> Tools run in your browser • AI powered by Puter<br>
+      <span class="ic">⚖️</span> For lawful and ethical use only
+    </div>
+    <div class="foot-divider">Stay Connected</div>
+    <div class="social-row">
+      <a class="social-btn insta" href="https://instagram.com/glsorun" target="_blank" rel="noopener" title="Instagram">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="6" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.4" stroke="currentColor" stroke-width="1.8"/><circle cx="17.3" cy="6.7" r="1.15" fill="currentColor"/></svg>
+      </a>
+      <a class="social-btn gh" href="https://github.com/ajtze" target="_blank" rel="noopener" title="GitHub">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.5 5.73.5 12.02c0 5.05 3.28 9.33 7.83 10.84.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.11-3.19.69-3.86-1.36-3.86-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.16.08 1.76 1.19 1.76 1.19 1.03 1.75 2.69 1.25 3.34.96.1-.75.4-1.25.73-1.54-2.55-.29-5.23-1.27-5.23-5.68 0-1.25.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 2.9-.39c.98.01 1.97.13 2.9.39 2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.08 0 4.42-2.69 5.39-5.25 5.67.41.36.78 1.05.78 2.11 0 1.53-.01 2.76-.01 3.13 0 .3.21.66.79.55A10.53 10.53 0 0 0 23.5 12c0-6.29-5.23-11.5-11.5-11.5Z"/></svg>
+      </a>
+      <a class="social-btn wa" href="https://whatsapp.com/channel/0029VbDJFr5DTkK3dxbi7F22" target="_blank" rel="noopener" title="WhatsApp Channel">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+      </a>
+    </div>
+    <div class="foot-copy">
+      © <span id="year"></span> <span class="gname">glsorun</span> — All rights reserved. <span style="opacity:.7;margin-left:6px">·</span><span style="opacity:.7;margin-left:6px">v2.0</span>
+    </div>
+  </div>
+</footer>
+
+</div>
+
+<!-- ARGUS FAB -->
+<div class="argus-tip" id="argusTip">Ask Argus</div>
+<button class="argus-fab" id="argusFab" type="button" aria-label="Open Argus" title="Argus">
+  <span class="argus-fab-inner">
+    <div class="argus-blob">
+      <div class="argus-water">
+        <div class="argus-wash"></div><div class="argus-wash"></div><div class="argus-wash"></div>
+        <div class="argus-core"></div><div class="argus-highlight"></div>
+        <span class="argus-spark s1"></span><span class="argus-spark s2"></span><span class="argus-spark s3"></span><span class="argus-spark s4"></span>
+        <span class="argus-spark s5"></span><span class="argus-spark s6"></span><span class="argus-spark s7"></span><span class="argus-spark s8"></span>
+      </div>
+    </div>
+  </span>
+</button>
+
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://unpkg.com/libphonenumber-js@1.11.10/bundle/libphonenumber-js.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+<script>
+/* ============ HELPERS ============ */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+
+function toast(msg, ms=2400){
+  const t=$('#toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'), ms);
+}
+function humanSize(n){
+  if(n<1024) return n+' B';
+  if(n<1048576) return (n/1024).toFixed(1)+' KB';
+  return (n/1048576).toFixed(2)+' MB';
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function downloadBlob(blob, name){
+  const a=document.createElement('a'); const u=URL.createObjectURL(blob);
+  a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u), 2000);
+}
+
+/* ============ THEME + TABS + YEAR ============ */
+const PAGES=['image','code','osint','utils','argus'];
+function showPage(name, push){
+  if(!PAGES.includes(name)) name='image';
+  $$('.panel').forEach(p=>p.classList.remove('active'));
+  const p=$('#panel-'+name); if(p) p.classList.add('active');
+  $$('.tab').forEach(t=>t.classList.toggle('active', t.dataset.panel===name));
+  if(push!==false && location.hash!=='#/'+name) history.pushState(null,'','#/'+name);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+$$('.tab').forEach(t=>t.addEventListener('click', ()=>showPage(t.dataset.panel)));
+window.addEventListener('hashchange', ()=>{ const h=(location.hash||'#/image').replace('#/','')||'image'; showPage(h,false); });
+(function(){ const h=(location.hash||'#/image').replace('#/','')||'image'; showPage(h,false); })();
+
+function applyTheme(t){
+  document.documentElement.dataset.theme=t;
+  $('#themeBtn').textContent = t==='dark'?'☀️':'🌙';
+}
+(function(){ applyTheme(localStorage.getItem('glsorun_theme')||'light'); })();
+$('#themeBtn').addEventListener('click', ()=>{
+  const d=document.documentElement.dataset.theme==='dark';
+  const n=d?'light':'dark';
+  applyTheme(n); localStorage.setItem('glsorun_theme', n);
+});
+(function(){ const y=$('#year'); if(y) y.textContent=new Date().getFullYear(); })();
+
+/* ============ EXIF PARSER ============ */
+const EXIF_TAGS={0x0100:'ImageWidth',0x0101:'ImageHeight',0x010E:'ImageDescription',0x010F:'Make',0x0110:'Model',0x0112:'Orientation',0x011A:'XResolution',0x011B:'YResolution',0x0128:'ResolutionUnit',0x0131:'Software',0x0132:'DateTime',0x013B:'Artist',0x8298:'Copyright',0x829A:'ExposureTime',0x829D:'FNumber',0x8822:'ExposureProgram',0x8827:'ISOSpeedRatings',0x9000:'ExifVersion',0x9003:'DateTimeOriginal',0x9004:'DateTimeDigitized',0x9201:'ShutterSpeedValue',0x9202:'ApertureValue',0x9203:'BrightnessValue',0x9204:'ExposureBiasValue',0x9205:'MaxApertureValue',0x9207:'MeteringMode',0x9208:'LightSource',0x9209:'Flash',0x920A:'FocalLength',0x927C:'MakerNote',0x9286:'UserComment',0xA001:'ColorSpace',0xA002:'PixelXDimension',0xA003:'PixelYDimension',0xA20E:'FocalPlaneXResolution',0xA20F:'FocalPlaneYResolution',0xA217:'SensingMethod',0xA300:'FileSource',0xA301:'SceneType',0xA401:'CustomRendered',0xA402:'ExposureMode',0xA403:'WhiteBalance',0xA404:'DigitalZoomRatio',0xA405:'FocalLengthIn35mmFilm',0xA406:'SceneCaptureType',0xA420:'ImageUniqueID',0xA430:'CameraOwnerName',0xA431:'BodySerialNumber',0xA433:'LensMake',0xA434:'LensModel'};
+const GPS_TAGS={0:'GPSVersionID',1:'GPSLatitudeRef',2:'GPSLatitude',3:'GPSLongitudeRef',4:'GPSLongitude',5:'GPSAltitudeRef',6:'GPSAltitude',7:'GPSTimeStamp',29:'GPSDateStamp'};
+const FLASH_MAP={0x0:'Did not fire',0x1:'Fired',0x5:'Fired (no reflection)',0x7:'Fired (reflection)',0x9:'Forced',0x10:'Off',0x18:'Off, auto',0x19:'Fired, auto',0x20:'No flash function'};
+const ORIENT_MAP={1:'Normal',2:'Mirror H',3:'Rotated 180°',4:'Mirror V',5:'Mirror+90° CW',6:'Rotated 90° CW',7:'Mirror+90° CCW',8:'Rotated 90° CCW'};
+
+function parseExif(buffer){
+  const dv=new DataView(buffer);
+  const out={ifd0:{},exif:{},gps:{},gpsRaw:null};
+  if(dv.byteLength<4||dv.getUint16(0)!==0xFFD8) return null;
+  let off=2,tiff=-1;
+  while(off<dv.byteLength-4){
+    if(dv.getUint8(off)!==0xFF) break;
+    const m=dv.getUint8(off+1);
+    if(m===0xD8||m===0x01||(m>=0xD0&&m<=0xD7)){off+=2;continue;}
+    if(m===0xDA||m===0xD9) break;
+    const sz=dv.getUint16(off+2);
+    if(m===0xE1){
+      const s=off+4;
+      if(dv.getUint32(s)===0x45786966 && dv.getUint16(s+4)===0){tiff=s+6;break;}
+    }
+    off+=2+sz;
+  }
+  if(tiff<0) return out;
+  const little=dv.getUint16(tiff)===0x4949;
+  if(dv.getUint16(tiff+2,little)!==42) return out;
+  const ifd0Off=dv.getUint32(tiff+4,little);
+
+  function readVal(pos){
+    const type=dv.getUint16(pos+2,little);
+    const count=dv.getUint32(pos+4,little);
+    const sizes={1:1,2:1,3:2,4:4,5:8,6:1,7:1,8:2,9:4,10:8,11:4,12:8};
+    const unit=sizes[type]||1;
+    const total=unit*count;
+    let p=pos+8;
+    if(total>4) p=tiff+dv.getUint32(pos+8,little);
+    if(p+total>dv.byteLength) return null;
+    try{
+      if(type===2){let s='';for(let i=0;i<count;i++){const c=dv.getUint8(p+i);if(c===0)break;s+=String.fromCharCode(c);}return s.trim();}
+      if(type===3){const a=[];for(let i=0;i<count;i++)a.push(dv.getUint16(p+i*2,little));return count===1?a[0]:a;}
+      if(type===4){const a=[];for(let i=0;i<count;i++)a.push(dv.getUint32(p+i*4,little));return count===1?a[0]:a;}
+      if(type===9){const a=[];for(let i=0;i<count;i++)a.push(dv.getInt32(p+i*4,little));return count===1?a[0]:a;}
+      if(type===5||type===10){
+        const a=[];
+        for(let i=0;i<count;i++){
+          const n=type===5?dv.getUint32(p+i*8,little):dv.getInt32(p+i*8,little);
+          const d=type===5?dv.getUint32(p+i*8+4,little):dv.getInt32(p+i*8+4,little);
+          a.push([n,d]);
+        }
+        return count===1?a[0]:a;
+      }
+      const a=[];for(let i=0;i<Math.min(count,32);i++)a.push(dv.getUint8(p+i));return a;
+    }catch(e){return null;}
+  }
+  function walk(offset, map, target){
+    if(offset<=0||tiff+offset>=dv.byteLength) return -1;
+    const count=dv.getUint16(tiff+offset,little);
+    let p=tiff+offset+2;
+    let subE=-1,subG=-1;
+    for(let i=0;i<count;i++){
+      const pos=p+i*12;
+      if(pos+12>dv.byteLength) break;
+      const tag=dv.getUint16(pos,little);
+      const val=readVal(pos);
+      const name=map[tag]||('Tag_0x'+tag.toString(16).toUpperCase());
+      if(tag===0x8769) subE=val;
+      else if(tag===0x8825) subG=val;
+      else if(val!==null && val!=='' && !(Array.isArray(val)&&val.length===0)) target[name]={tag,val};
+    }
+    return {subE,subG};
+  }
+  const r0=walk(ifd0Off,EXIF_TAGS,out.ifd0);
+  if(r0&&r0.subE>0) walk(r0.subE,EXIF_TAGS,out.exif);
+  if(r0&&r0.subG>0){
+    walk(r0.subG,GPS_TAGS,out.gps);
+    const la=out.gps['GPSLatitude'],lo=out.gps['GPSLongitude'];
+    const laR=out.gps['GPSLatitudeRef'],loR=out.gps['GPSLongitudeRef'];
+    if(la&&lo&&Array.isArray(la.val)&&Array.isArray(lo.val)){
+      const toDec=(c,ref)=>{
+        try{
+          const d=c[0][0]/c[0][1],m=c[1][0]/c[1][1],s=c[2][0]/c[2][1];
+          let dec=d+m/60+s/3600;
+          if(ref==='S'||ref==='W') dec=-dec;
+          return dec;
+        }catch(e){return null;}
+      };
+      const lat=toDec(la.val, laR?laR.val:'N');
+      const lon=toDec(lo.val, loR?loR.val:'E');
+      if(lat!==null && lon!==null) out.gpsRaw={lat,lon};
+    }
+  }
+  return out;
+}
+function parsePngText(buffer){
+  const dv=new DataView(buffer);
+  const sig=[0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A];
+  if(dv.byteLength<8) return null;
+  for(let i=0;i<8;i++) if(dv.getUint8(i)!==sig[i]) return null;
+  const out=[]; let off=8;
+  const dec=new TextDecoder('latin1');
+  while(off+12<=dv.byteLength){
+    const len=dv.getUint32(off);
+    const type=String.fromCharCode(dv.getUint8(off+4),dv.getUint8(off+5),dv.getUint8(off+6),dv.getUint8(off+7));
+    if(len>dv.byteLength) break;
+    if(type==='tEXt'||type==='iTXt'||type==='zTXt'){
+      const data=new Uint8Array(buffer,off+8,len);
+      const sep=data.indexOf(0);
+      if(sep>0){
+        const key=dec.decode(data.slice(0,sep));
+        let value='';
+        if(type==='tEXt') value=dec.decode(data.slice(sep+1)).replace(/\0+$/,'');
+        else{
+          const rest=data.slice(sep+1);
+          const s2=rest.indexOf(0),s3=rest.indexOf(0,s2+1),s4=rest.indexOf(0,s3+1);
+          value=s4>=0?dec.decode(rest.slice(s4+1)):'(compressed)';
+        }
+        if(value) out.push({key,value});
+      }
+    }
+    off+=12+len;
+    if(type==='IEND') break;
+  }
+  return out;
+}
+async function sha256Hex(buf){
+  try{const h=await crypto.subtle.digest('SHA-256',buf);return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join('');}
+  catch(e){return 'Unavailable (HTTPS required)';}
+}
+function stripJpeg(buffer){
+  const b=new Uint8Array(buffer);
+  if(b.length<4||b[0]!==0xFF||b[1]!==0xD8) return null;
+  const keep=[[0,2]]; let i=2;
+  while(i<b.length-1){
+    if(b[i]!==0xFF){i++;continue;}
+    const m=b[i+1];
+    if(m===0xFF){i++;continue;}
+    if(m===0xD8||m===0x01||(m>=0xD0&&m<=0xD7)){keep.push([i,i+2]);i+=2;continue;}
+    if(m===0xDA){keep.push([i,b.length]);break;}
+    if(m===0xD9){keep.push([i,i+2]);i+=2;break;}
+    const len=(b[i+2]<<8)|b[i+3];
+    const end=i+2+len;
+    if(end>b.length) break;
+    const isMeta=(m>=0xE0&&m<=0xEF)||m===0xFE;
+    if(!isMeta) keep.push([i,end]);
+    i=end;
+  }
+  let total=0; keep.forEach(([s,e])=>total+=e-s);
+  const out=new Uint8Array(total); let p=0;
+  keep.forEach(([s,e])=>{out.set(b.subarray(s,e),p);p+=e-s;});
+  return out;
+}
+function loadImage(url){ return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url;}); }
+
+/* ============ IMAGE METADATA CLEANER ============ */
+let currentFile=null, cleanedBlob=null, cleanedName='';
+const dropZone=$('#dropZone'), fileInput=$('#fileInput');
+dropZone.addEventListener('click',()=>fileInput.click());
+fileInput.addEventListener('change',e=>{if(e.target.files[0]) handleFile(e.target.files[0]);});
+['dragenter','dragover'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>dropZone.addEventListener(ev,e=>{e.preventDefault();dropZone.classList.remove('drag');}));
+dropZone.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f) handleFile(f);});
+
+async function handleFile(file){
+  if(!file.type.startsWith('image/') && !/\.(jpe?g|png|webp|gif|bmp|heic)$/i.test(file.name)){toast('⚠️ Please select an image');return;}
+  currentFile=file; cleanedBlob=null;
+  $('#btnDownloadClean').disabled=true;
+  $('#cleanStatus').textContent='Waiting…'; $('#cleanStatus').className='v';
+  $('#sizeAfter').textContent='—'; $('#sizeBefore').textContent=humanSize(file.size);
+  const buf=await file.arrayBuffer();
+  const hash=await sha256Hex(buf.slice(0));
+  const dims=await new Promise(res=>{
+    const url=URL.createObjectURL(file); const img=new Image();
+    img.onload=()=>{res({w:img.naturalWidth,h:img.naturalHeight});URL.revokeObjectURL(url);};
+    img.onerror=()=>{res(null);URL.revokeObjectURL(url);};
+    img.src=url;
+  });
+  const exif=parseExif(buf)||{ifd0:{},exif:{},gps:{},gpsRaw:null};
+  const pngText=parsePngText(buf);
+  renderMetadata(file,hash,dims,exif,pngText);
+  $('#cleanCard').style.display='block';
+}
+function renderMetadata(file,hash,dims,exif,pngText){
+  const groups=[];
+  groups.push({title:'📁 File Information', rows:[
+    ['Name',file.name],['Type',file.type||'Unknown'],
+    ['Size',`${humanSize(file.size)} (${file.size.toLocaleString()} bytes)`],
+    ['Modified',file.lastModified?new Date(file.lastModified).toLocaleString():'Unknown'],
+    ['Resolution',dims?`${dims.w} × ${dims.h} px`:'Unknown'],
+    ['Megapixels',dims?((dims.w*dims.h)/1e6).toFixed(2)+' MP':'—'],
+    ['SHA-256',hash]
+  ]});
+  const fmt=(name,v)=>{
+    if(name==='Orientation'&&ORIENT_MAP[v]) return `${v} — ${ORIENT_MAP[v]}`;
+    if(name==='Flash'&&FLASH_MAP[v]) return `${v} — ${FLASH_MAP[v]}`;
+    if(name==='ExposureTime'&&Array.isArray(v)) return v[1]?`${v[0]}/${v[1]} sec`:`${v[0]}`;
+    if(name==='FNumber'&&Array.isArray(v)) return `f/${(v[0]/v[1]).toFixed(1)}`;
+    if(name==='FocalLength'&&Array.isArray(v)) return `${(v[0]/v[1]).toFixed(1)} mm`;
+    if(Array.isArray(v)){
+      if(v.length&&Array.isArray(v[0])) return v.map(p=>p[1]?(p[0]/p[1]).toFixed(4):p[0]).join(', ');
+      return v.join(', ');
+    }
+    return String(v);
+  };
+  const ifdRows=Object.entries(exif.ifd0).map(([k,o])=>[k,fmt(k,o.val)]);
+  if(ifdRows.length) groups.push({title:'🏷️ General Tags',rows:ifdRows});
+  const exifRows=Object.entries(exif.exif).map(([k,o])=>[k,fmt(k,o.val)]);
+  if(exifRows.length) groups.push({title:'📷 Camera Info',rows:exifRows});
+  const gpsRows=Object.entries(exif.gps).filter(([k])=>!['GPSLatitude','GPSLongitude'].includes(k)).map(([k,o])=>[k,fmt(k,o.val)]);
+  if(exif.gpsRaw){
+    const {lat,lon}=exif.gpsRaw;
+    gpsRows.unshift(['📍 Coordinates',`${lat.toFixed(6)}, ${lon.toFixed(6)}`]);
+    gpsRows.push(['🗺️ Map',`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=16/${lat}/${lon}`]);
+  }
+  if(gpsRows.length) groups.push({title:'📍 GPS',rows:gpsRows});
+  if(pngText&&pngText.length) groups.push({title:'📝 PNG Text',rows:pngText.map(t=>[t.key,t.value])});
+  const total=ifdRows.length+exifRows.length+gpsRows.length+(pngText?pngText.length:0);
+  let html=`<div class="card">
+    <div class="card-head"><h2>📊 Metadata Report</h2><span class="hint">${total} tags</span></div>
+    <div class="stats">
+      <div class="stat"><div class="k">Tags</div><div class="v ${total>0?'bad':'good'}">${total}</div></div>
+      <div class="stat"><div class="k">GPS</div><div class="v ${exif.gpsRaw?'bad':'good'}">${exif.gpsRaw?'Present ⚠️':'None ✅'}</div></div>
+      <div class="stat"><div class="k">Camera</div><div class="v ${exif.ifd0.Make||exif.ifd0.Model?'bad':'good'}">${exif.ifd0.Make||exif.ifd0.Model?'Present ⚠️':'None ✅'}</div></div>
+      <div class="stat"><div class="k">Timestamp</div><div class="v ${(exif.ifd0.DateTime||exif.exif.DateTimeOriginal)?'bad':'good'}">${(exif.ifd0.DateTime||exif.exif.DateTimeOriginal)?'Present ⚠️':'None ✅'}</div></div>
+    </div></div>`;
+  if(!total) html+=`<div class="card"><div class="empty"><span class="ico">🎉</span><b style="color:var(--ok);font-size:15px">No metadata found!</b></div></div>`;
+  groups.forEach(g=>{
+    if(!g.rows.length) return;
+    html+=`<div class="card">
+      <div class="card-head"><h2>${g.title}</h2><span class="hint">${g.rows.length}</span></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody>
+      ${g.rows.map(([k,v])=>{
+        const isLink=/^https?:\/\//.test(String(v));
+        const cell=isLink?`<a href="${escapeHtml(v)}" target="_blank" style="color:var(--accent)">${escapeHtml(v)}</a>`:escapeHtml(String(v));
+        return `<tr><td>${escapeHtml(k)}</td><td>${cell}</td></tr>`;
+      }).join('')}
+      </tbody></table></div></div>`;
+  });
+  $('#metaResult').innerHTML=html;
+}
+$('#quality').addEventListener('input',e=>$('#qVal').textContent=e.target.value);
+$('#cleanMode').addEventListener('change',e=>{$('#qualityField').style.display=e.target.value==='lossless'?'none':'block';});
+$('#btnClean').addEventListener('click',async()=>{
+  if(!currentFile) return;
+  const mode=$('#cleanMode').value, status=$('#cleanStatus');
+  try{
+    status.textContent='Processing…'; status.className='v';
+    await new Promise(r=>setTimeout(r,30));
+    let blob, ext;
+    if(mode==='lossless'){
+      const buf=await currentFile.arrayBuffer();
+      const st=stripJpeg(buf);
+      if(!st) throw new Error('Lossless only works for JPEG.');
+      blob=new Blob([st],{type:'image/jpeg'}); ext='jpg';
+    } else {
+      const url=URL.createObjectURL(currentFile);
+      const img=await loadImage(url);
+      const c=document.createElement('canvas');
+      c.width=img.naturalWidth; c.height=img.naturalHeight;
+      const ctx=c.getContext('2d');
+      if(mode==='image/jpeg'){ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);}
+      ctx.drawImage(img,0,0); URL.revokeObjectURL(url);
+      const q=parseInt($('#quality').value)/100;
+      blob=await new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('Encoding failed')),mode,q));
+      ext=mode.split('/')[1].replace('jpeg','jpg');
+    }
+    cleanedBlob=blob;
+    const base=currentFile.name.replace(/\.[^.]+$/,'');
+    cleanedName=`${base}_clean.${ext}`;
+    $('#sizeAfter').textContent=humanSize(blob.size);
+    $('#btnDownloadClean').disabled=false;
+    status.textContent='Ready ✅'; status.className='v good';
+    toast('✅ Metadata removed');
+  }catch(e){ status.textContent='Error ✕'; status.className='v bad'; toast('❌ '+e.message, 3600); }
+});
+$('#btnDownloadClean').addEventListener('click',()=>{ if(!cleanedBlob) return; downloadBlob(cleanedBlob, cleanedName); toast('⬇️ '+cleanedName); });
+
+/* ============ IMAGE COMPRESSOR ============ */
+let compFile=null, compBlob=null;
+const compDrop=$('#compDrop'), compInput=$('#compInput');
+compDrop.addEventListener('click',()=>compInput.click());
+compInput.addEventListener('change',e=>{ if(e.target.files[0]) loadComp(e.target.files[0]); });
+['dragenter','dragover'].forEach(ev=>compDrop.addEventListener(ev,e=>{e.preventDefault();compDrop.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>compDrop.addEventListener(ev,e=>{e.preventDefault();compDrop.classList.remove('drag');}));
+compDrop.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f) loadComp(f);});
+function loadComp(f){
+  compFile=f; compBlob=null; compDrop.querySelector('h3').textContent=f.name;
+  $('#compBefore').textContent=humanSize(f.size);
+  $('#compAfter').textContent='—'; $('#compSaved').textContent='—';
+  $('#compBtn').disabled=false; $('#compDownload').disabled=true;
+}
+$('#compQ').addEventListener('input',e=>$('#compQVal').textContent=e.target.value);
+$('#compBtn').addEventListener('click',async()=>{
+  if(!compFile) return;
+  const url=URL.createObjectURL(compFile);
+  const img=await loadImage(url);
+  const c=document.createElement('canvas');
+  c.width=img.naturalWidth; c.height=img.naturalHeight;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height);
+  ctx.drawImage(img,0,0); URL.revokeObjectURL(url);
+  const q=parseInt($('#compQ').value)/100;
+  const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',q));
+  compBlob=blob;
+  $('#compAfter').textContent=humanSize(blob.size);
+  const saved=((compFile.size-blob.size)/compFile.size*100).toFixed(1);
+  $('#compSaved').textContent=saved+'%';
+  $('#compDownload').disabled=false;
+  toast('🗜️ Compressed — saved '+saved+'%');
+});
+$('#compDownload').addEventListener('click',()=>{
+  if(!compBlob) return;
+  downloadBlob(compBlob, compFile.name.replace(/\.[^.]+$/,'')+'_compressed.jpg');
+  toast('⬇️ Downloaded');
+});
+
+/* ============ EXIF TIMELINE MAP ============ */
+let mapObj=null, mapMarkers=[];
+const mapDrop=$('#mapDrop'), mapInput=$('#mapInput');
+mapDrop.addEventListener('click',()=>mapInput.click());
+mapInput.addEventListener('change',e=>handleMapFiles(e.target.files));
+mapDrop.addEventListener('drop',e=>{e.preventDefault();mapDrop.classList.remove('drag');handleMapFiles(e.dataTransfer.files);});
+['dragenter','dragover'].forEach(ev=>mapDrop.addEventListener(ev,e=>{e.preventDefault();mapDrop.classList.add('drag');}));
+['dragleave'].forEach(ev=>mapDrop.addEventListener(ev,()=>mapDrop.classList.remove('drag')));
+
+async function handleMapFiles(files){
+  if(!files||!files.length) return;
+  const photos=[];
+  const out=$('#mapOut');
+  out.classList.add('show');
+  out.textContent='Scanning '+files.length+' images…';
+  for(const f of files){
+    if(!f.type.startsWith('image/')) continue;
+    const buf=await f.arrayBuffer();
+    const exif=parseExif(buf)||{};
+    if(exif.gpsRaw){
+      const dt=exif.ifd0?.DateTime?.val || exif.exif?.DateTimeOriginal?.val || '';
+      photos.push({name:f.name, lat:exif.gpsRaw.lat, lon:exif.gpsRaw.lon, date:dt});
+    }
+  }
+  if(!photos.length){
+    out.innerHTML='<span class="err">❌ No GPS data found in any image.</span>';
+    $('#mapContainer').style.display='none';
+    return;
+  }
+  let s='';
+  s+=`<span class="ok">✅ Found ${photos.length} photo(s) with GPS</span>\n\n`;
+  photos.forEach((p,i)=>{
+    s+=`${i+1}. <span class="k">${escapeHtml(p.name)}</span>\n`;
+    s+=`   📍 ${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}\n`;
+    if(p.date) s+=`   🕐 ${escapeHtml(p.date)}\n`;
+    s+='\n';
+  });
+  out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+
+  $('#mapContainer').style.display='block';
+  if(mapObj){ mapObj.remove(); mapObj=null; }
+  if(typeof L==='undefined'){ out.innerHTML+='<span class="err">Map library failed to load.</span>'; return; }
+  const avgLat=photos.reduce((a,p)=>a+p.lat,0)/photos.length;
+  const avgLon=photos.reduce((a,p)=>a+p.lon,0)/photos.length;
+  mapObj=L.map('mapContainer').setView([avgLat,avgLon],6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19, attribution:'© OpenStreetMap'}).addTo(mapObj);
+  photos.forEach((p,i)=>{
+    const m=L.marker([p.lat,p.lon]).addTo(mapObj);
+    m.bindPopup(`<b>${i+1}. ${escapeHtml(p.name)}</b><br>${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}${p.date?'<br>'+escapeHtml(p.date):''}`);
+  });
+  setTimeout(()=>mapObj.invalidateSize(),200);
+}
+
+/* ============ VIDEO METADATA ============ */
+const vidDrop=$('#vidDrop'), vidInput=$('#vidInput'), vidPreview=$('#vidPreview');
+vidDrop.addEventListener('click',()=>vidInput.click());
+vidInput.addEventListener('change',e=>{if(e.target.files[0]) handleVideo(e.target.files[0]);});
+vidDrop.addEventListener('drop',e=>{e.preventDefault();vidDrop.classList.remove('drag');if(e.dataTransfer.files[0])handleVideo(e.dataTransfer.files[0]);});
+['dragenter','dragover'].forEach(ev=>vidDrop.addEventListener(ev,e=>{e.preventDefault();vidDrop.classList.add('drag');}));
+['dragleave'].forEach(ev=>vidDrop.addEventListener(ev,()=>vidDrop.classList.remove('drag')));
+
+async function handleVideo(file){
+  const out=$('#vidOut');
+  out.classList.add('show');
+  out.innerHTML='<span class="spin"></span> Reading metadata…';
+  const url=URL.createObjectURL(file);
+  vidPreview.src=url; vidPreview.style.display='block';
+  try{
+    await new Promise((res,rej)=>{ vidPreview.onloadedmetadata=res; vidPreview.onerror=rej; setTimeout(res,4000); });
+    let s='';
+    s+=kv('File Name', file.name)+'\n';
+    s+=kv('File Type', file.type||'Unknown')+'\n';
+    s+=kv('File Size', humanSize(file.size))+'\n';
+    s+=kv('Duration', vidPreview.duration?vidPreview.duration.toFixed(2)+' sec':'Unknown')+'\n';
+    s+=kv('Resolution', vidPreview.videoWidth+' × '+vidPreview.videoHeight+' px')+'\n';
+    if(vidPreview.duration && vidPreview.videoWidth){
+      const bitrate=(file.size*8)/(vidPreview.duration*1000);
+      s+=kv('Approx Bitrate', bitrate.toFixed(0)+' kbps')+'\n';
+    }
+    s+=kv('Last Modified', file.lastModified?new Date(file.lastModified).toLocaleString():'—')+'\n';
+    out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+  }catch(e){
+    out.innerHTML='<span class="err">❌ Could not read video.</span>';
+  }
+}
+function kv(k,v){ return `<span class="k">${escapeHtml(k)}:</span> ${escapeHtml(String(v))}`; }
+
+/* ============ STEGANOGRAPHY ============ */
+let stegoMode='secure';
+$$('.stego-mode').forEach(el=>el.addEventListener('click',()=>{
+  $$('.stego-mode').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  stegoMode=el.dataset.mode;
+  const note=$('#stegoNote');
+  if(stegoMode==='secure'){
+    note.textContent='💡 Recommended: Secure Mode — Your text stays truly private';
+    note.style.color='var(--accent)';
+    note.style.background='rgba(91,124,250,.08)';
+  } else {
+    note.textContent='⚠️ Open Mode: Anyone with a metadata reader can see your text. Not for secrets.';
+    note.style.color='var(--warn)';
+    note.style.background='rgba(201,146,46,.08)';
+  }
+}));
+$$('.stego-tab').forEach(t=>t.addEventListener('click',()=>{
+  $$('.stego-tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  if(t.dataset.stegoTab==='hide'){
+    $('#stegoHide').style.display='block'; $('#stegoReveal').style.display='none';
+  } else {
+    $('#stegoHide').style.display='none'; $('#stegoReveal').style.display='block';
+  }
+}));
+
+// Secure (LSB) encode/decode
+function textToBits(text){
+  const bytes=new TextEncoder().encode(text);
+  const bits=[];
+  bytes.forEach(b=>{ for(let i=7;i>=0;i--) bits.push((b>>i)&1); });
+  return bits;
+}
+function bitsToText(bits){
+  const bytes=[];
+  for(let i=0;i<bits.length;i+=8){
+    let b=0; for(let j=0;j<8;j++) b=(b<<1)|bits[i+j];
+    bytes.push(b);
+  }
+  return new TextDecoder().decode(new Uint8Array(bytes));
+}
+function xorEncrypt(text, password){
+  if(!password) return text;
+  const data=new TextEncoder().encode(text);
+  const pass=new TextEncoder().encode(password);
+  const out=new Uint8Array(data.length);
+  for(let i=0;i<data.length;i++) out[i]=data[i]^pass[i%pass.length];
+  return new TextDecoder('latin1').decode(out);
+}
+function xorDecrypt(text, password){
+  if(!password) return text;
+  const data=new TextEncoder().encode(text);
+  const pass=new TextEncoder().encode(password);
+  const out=new Uint8Array(data.length);
+  for(let i=0;i<data.length;i++) out[i]=data[i]^pass[i%pass.length];
+  return new TextDecoder().decode(out);
+}
+
+let stegoHideFile=null, stegoHideBlob=null;
+const stegoDrop=$('#stegoDrop'), stegoInput=$('#stegoInput');
+stegoDrop.addEventListener('click',()=>stegoInput.click());
+stegoInput.addEventListener('change',e=>{if(e.target.files[0]){stegoHideFile=e.target.files[0];stegoDrop.querySelector('h3').textContent=e.target.files[0].name;$('#stegoHideBtn').disabled=false;}});
+stegoDrop.addEventListener('drop',e=>{e.preventDefault();stegoDrop.classList.remove('drag');const f=e.dataTransfer.files[0];if(f){stegoHideFile=f;stegoDrop.querySelector('h3').textContent=f.name;$('#stegoHideBtn').disabled=false;}});
+['dragenter','dragover'].forEach(ev=>stegoDrop.addEventListener(ev,e=>{e.preventDefault();stegoDrop.classList.add('drag');}));
+['dragleave'].forEach(ev=>stegoDrop.addEventListener(ev,()=>stegoDrop.classList.remove('drag')));
+
+$('#stegoHideBtn').addEventListener('click',async()=>{
+  if(!stegoHideFile) return;
+  const text=$('#stegoText').value;
+  if(!text){ toast('⚠️ Enter secret text'); return; }
+  const pass=$('#stegoPass').value;
+  const out=$('#stegoHideOut');
+  out.classList.add('show'); out.innerHTML='<span class="spin"></span> Hiding…';
+  try{
+    const url=URL.createObjectURL(stegoHideFile);
+    const img=await loadImage(url);
+    const c=document.createElement('canvas');
+    c.width=img.naturalWidth; c.height=img.naturalHeight;
+    const ctx=c.getContext('2d');
+    ctx.drawImage(img,0,0);
+    const imgData=ctx.getImageData(0,0,c.width,c.height);
+    const data=imgData.data;
+
+    const payload = stegoMode==='secure'
+      ? 'STG1|'+xorEncrypt(text, pass)
+      : text;
+
+    if(stegoMode==='secure'){
+      // LSB hide with header + payload + terminator
+      const header='STG1:';
+      const fullText = header + xorEncrypt(text, pass) + '\0';
+      const bits = textToBits(fullText);
+      if(bits.length > data.length/3){
+        out.innerHTML='<span class="err">❌ Image too small to hide this text.</span>';
+        URL.revokeObjectURL(url);
+        return;
+      }
+      let bi=0;
+      for(let i=0;i<data.length && bi<bits.length; i+=4){
+        // modify R,G,B channels only (skip alpha)
+        for(let ch=0;ch<3;ch++){
+          if(bi<bits.length){
+            data[i+ch]=(data[i+ch] & 0xFE) | bits[bi];
+            bi++;
+          }
+        }
+      }
+      ctx.putImageData(imgData,0,0);
+      const blob=await new Promise(res=>c.toBlob(res,'image/png'));
+      stegoHideBlob=blob;
+      $('#stegoHideDownload').disabled=false;
+      out.innerHTML=`<span class="ok">✅ Text hidden securely (${text.length} chars, password: ${pass?'yes':'no'})</span>\nPNG output — download required for LSB to work.`;
+    } else {
+      // Open mode — embed in a PNG tEXt chunk
+      // Use canvas + manual PNG injection would be complex; instead we store as PNG and embed text chunk
+      // Simpler approach: append marker as text in canvas? Not ideal. Use PNG tEXt via a minimal approach.
+      // We'll use canvas + toBlob then inject a tEXt chunk.
+      const blob = await new Promise(res=>c.toBlob(res,'image/png'));
+      const buf = await blob.arrayBuffer();
+      const injected = injectPngText(buf, 'Comment', text);
+      stegoHideBlob = new Blob([injected], {type:'image/png'});
+      $('#stegoHideDownload').disabled=false;
+      out.innerHTML=`<span class="ok">✅ Text embedded in PNG metadata (Open Mode)</span>\nAny PNG text reader can extract it.`;
+    }
+    URL.revokeObjectURL(url);
+  }catch(e){
+    out.innerHTML='<span class="err">❌ '+escapeHtml(e.message)+'</span>';
+  }
+});
+
+// Inject a tEXt chunk into PNG (before IEND)
+function injectPngText(buffer, keyword, value){
+  const u8=new Uint8Array(buffer);
+  // find IEND position
+  let iendPos=-1;
+  for(let i=u8.length-12; i>=8; i--){
+    if(u8[i]===0x49&&u8[i+1]===0x45&&u8[i+2]===0x4E&&u8[i+3]===0x44){ iendPos=i-4; break; }
+  }
+  if(iendPos<0) return buffer;
+  const enc=new TextEncoder();
+  const keyB=enc.encode(keyword);
+  const valB=enc.encode(value);
+  const data=new Uint8Array(keyB.length+1+valB.length);
+  data.set(keyB,0); data[keyB.length]=0; data.set(valB,keyB.length+1);
+  const len=data.length;
+  const chunk=new Uint8Array(12+len);
+  const dv=new DataView(chunk.buffer);
+  dv.setUint32(0,len);
+  chunk[4]=0x74; chunk[5]=0x45; chunk[6]=0x58; chunk[7]=0x74; // 'tEXt'
+  chunk.set(data,8);
+  const crc=crc32(data);
+  dv.setUint32(8+len, crc);
+  const out=new Uint8Array(u8.length+chunk.length);
+  out.set(u8.subarray(0,iendPos),0);
+  out.set(chunk,iendPos);
+  out.set(u8.subarray(iendPos),iendPos+chunk.length);
+  return out.buffer;
+}
+const CRC_TABLE=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}return t;})();
+function crc32(u8){let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=CRC_TABLE[(c^u8[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+
+$('#stegoHideDownload').addEventListener('click',()=>{
+  if(!stegoHideBlob) return;
+  downloadBlob(stegoHideBlob, 'stego_'+Date.now()+'.png');
+  toast('⬇️ Image with hidden text');
+});
+
+// Reveal
+let stegoRevealFile=null;
+const stegoDropR=$('#stegoDropReveal'), stegoInputR=$('#stegoInputReveal');
+stegoDropR.addEventListener('click',()=>stegoInputR.click());
+stegoInputR.addEventListener('change',e=>{if(e.target.files[0]){stegoRevealFile=e.target.files[0];stegoDropR.querySelector('h3').textContent=e.target.files[0].name;$('#stegoRevealBtn').disabled=false;}});
+stegoDropR.addEventListener('drop',e=>{e.preventDefault();stegoDropR.classList.remove('drag');const f=e.dataTransfer.files[0];if(f){stegoRevealFile=f;stegoDropR.querySelector('h3').textContent=f.name;$('#stegoRevealBtn').disabled=false;}});
+['dragenter','dragover'].forEach(ev=>stegoDropR.addEventListener(ev,e=>{e.preventDefault();stegoDropR.classList.add('drag');}));
+['dragleave'].forEach(ev=>stegoDropR.addEventListener(ev,()=>stegoDropR.classList.remove('drag')));
+
+$('#stegoRevealBtn').addEventListener('click',async()=>{
+  if(!stegoRevealFile) return;
+  const pass=$('#stegoRevealPass').value;
+  const out=$('#stegoRevealOut');
+  out.classList.add('show'); out.innerHTML='<span class="spin"></span> Revealing…';
+
+  // Try Open Mode first (PNG text chunks)
+  try{
+    const buf=await stegoRevealFile.arrayBuffer();
+    const png=parsePngText(buf);
+    if(png && png.length){
+      const found=png.find(t=>t.key==='Comment');
+      if(found){
+        out.innerHTML=`<span class="ok">✅ Found hidden text (Open Mode):</span>\n\n<span class="k">${escapeHtml(found.value)}</span>`;
+        return;
+      }
+    }
+  }catch(e){}
+
+  // Try Secure Mode (LSB)
+  try{
+    const url=URL.createObjectURL(stegoRevealFile);
+    const img=await loadImage(url);
+    const c=document.createElement('canvas');
+    c.width=img.naturalWidth; c.height=img.naturalHeight;
+    const ctx=c.getContext('2d');
+    ctx.drawImage(img,0,0);
+    const data=ctx.getImageData(0,0,c.width,c.height).data;
+    const bits=[];
+    const limit=Math.min(data.length, 500000*8);
+    for(let i=0;i<data.length && bits.length<limit; i+=4){
+      for(let ch=0;ch<3;ch++) bits.push(data[i+ch]&1);
+    }
+    // Find header 'STG1:' bits
+    const headerBits=textToBits('STG1:');
+    let startIdx=-1;
+    for(let i=0;i<bits.length-headerBits.length;i++){
+      let match=true;
+      for(let j=0;j<headerBits.length;j++){
+        if(bits[i+j]!==headerBits[j]){match=false;break;}
+      }
+      if(match){startIdx=i;break;}
+    }
+    if(startIdx>=0){
+      const after=bits.slice(startIdx+headerBits.length);
+      // Read until null terminator (8 zero bits)
+      let text='';
+      let bytes=[];
+      for(let i=0;i+7<after.length;i+=8){
+        let b=0; for(let j=0;j<8;j++) b=(b<<1)|after[i+j];
+        if(b===0) break;
+        bytes.push(b);
+        if(bytes.length>10000) break;
+      }
+      const raw=new TextDecoder('latin1').decode(new Uint8Array(bytes));
+      const decrypted=xorDecrypt(raw, pass);
+      out.innerHTML=`<span class="ok">✅ Found hidden text (Secure Mode):</span>\n\n<span class="k">${escapeHtml(decrypted)}</span>`;
+      URL.revokeObjectURL(url);
+      return;
+    }
+    URL.revokeObjectURL(url);
+  }catch(e){}
+
+  out.innerHTML='<span class="err">❌ No hidden text found. Try the other mode, or check password.</span>';
+});
+
+/* ============ CODE EDITOR ============ */
+const codeInput=$('#codeInput'), preview=$('#preview');
+const SAMPLE=`<!DOCTYPE html><html><head><style>body{margin:0;height:100vh;display:grid;place-items:center;font-family:system-ui;background:linear-gradient(135deg,#5b7cfa,#9d7bfa);color:#fff}.c{background:rgba(255,255,255,.15);backdrop-filter:blur(12px);padding:44px 54px;border-radius:26px;text-align:center;border:1px solid rgba(255,255,255,.3)}h1{margin:0 0 12px;font-size:34px}p{margin:0;opacity:.9}button{margin-top:22px;padding:12px 26px;border:0;border-radius:12px;background:#fff;color:#5b7cfa;font-weight:700;cursor:pointer}</style></head><body><div class="c"><h1>Hello World 👋</h1><p>Live preview. Edit code.</p><button onclick="alert('Works! 🎉')">Click Me</button></div></body></html>`;
+let previewTimer=null;
+function runPreview(){
+  const code=codeInput.value;
+  if(!code.trim()){ preview.srcdoc='<body style="font-family:system-ui;display:grid;place-items:center;height:100vh;color:#8a95a6;font-size:14px">Preview will appear here…</body>'; $('#previewStatus').textContent='Empty'; return; }
+  preview.srcdoc=code;
+  $('#previewStatus').textContent='Updated '+new Date().toLocaleTimeString();
+}
+codeInput.addEventListener('input',()=>{ $('#previewStatus').textContent='Typing…'; clearTimeout(previewTimer); previewTimer=setTimeout(runPreview,450); });
+$('#btnRun').addEventListener('click',()=>{runPreview();toast('▶️ Preview ran');});
+$('#btnClear').addEventListener('click',()=>{codeInput.value='';runPreview();toast('Cleared');});
+$('#btnSample').addEventListener('click',()=>{codeInput.value=SAMPLE;runPreview();toast('✨ Sample loaded');});
+function parseUserCode(code){
+  let styles='',scripts='',body=code;
+  try{
+    const doc=new DOMParser().parseFromString(code,'text/html');
+    styles=[...doc.querySelectorAll('style')].map(s=>s.textContent).join('\n\n');
+    scripts=[...doc.querySelectorAll('script')].map(s=>s.textContent).join('\n\n');
+    const hasHtml=/<html|<body|<head/i.test(code);
+    if(hasHtml||styles||scripts) body=doc.body?doc.body.innerHTML:code;
+  }catch(e){}
+  return {styles,scripts,body};
+}
+function buildFullHtml(code){
+  if(/<html[\s>]/i.test(code)) return code;
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>GLSORUN Export</title></head><body>${code}</body></html>`;
+}
+$$('[data-dl]').forEach(btn=>{
+  btn.addEventListener('click', async()=>{
+    const code=codeInput.value;
+    if(!code.trim()){toast('⚠️ Write code first');return;}
+    const type=btn.dataset.dl;
+    const stamp=new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+    try{
+      if(type==='html'){ downloadBlob(new Blob([buildFullHtml(code)],{type:'text/html;charset=utf-8'}),`code-${stamp}.html`); toast('⬇️ HTML'); }
+      else if(type==='txt'){ downloadBlob(new Blob([code],{type:'text/plain;charset=utf-8'}),`code-${stamp}.txt`); toast('⬇️ TXT'); }
+      else if(type==='zip'){
+        const enc=new TextEncoder();
+        const parsed=parseUserCode(code);
+        const files=[
+          {name:'index.html',data:enc.encode(buildFullHtml(code))},
+          {name:'code.txt',data:enc.encode(code)}
+        ];
+        if(parsed.styles) files.push({name:'style.css',data:enc.encode(parsed.styles)});
+        if(parsed.scripts) files.push({name:'script.js',data:enc.encode(parsed.scripts)});
+        files.push({name:'README.txt',data:enc.encode(`GLSORUN Export\n${new Date().toLocaleString()}\n\nOpen index.html\n`)});
+        downloadBlob(buildZip(files),`code-${stamp}.zip`);
+        toast('⬇️ ZIP ('+files.length+' files)');
+      }
+      else if(type==='pdf'){ await exportPDF(code,stamp); }
+    }catch(err){ toast('❌ '+err.message, 3600); }
+  });
+});
+async function exportPDF(code,stamp){
+  const parsed=parseUserCode(code);
+  if(typeof html2pdf==='undefined'){
+    const w=window.open('','_blank'); if(!w){toast('❌ Popup blocked');return;}
+    w.document.write(buildFullHtml(code)); w.document.close();
+    setTimeout(()=>{w.focus();w.print();},600); toast('🖨️ Print dialog'); return;
+  }
+  toast('⏳ Generating PDF…',5000);
+  const h=document.createElement('div');
+  h.style.cssText='position:fixed;left:-10000px;top:0;width:794px;background:#fff;color:#1a1a1a;padding:36px;box-sizing:border-box;font-family:system-ui,sans-serif;';
+  h.innerHTML=`<style>${parsed.styles||''}</style>${parsed.body||code}`;
+  document.body.appendChild(h);
+  try{
+    await html2pdf().set({margin:[10,10,12,10],filename:`code-${stamp}.pdf`,image:{type:'jpeg',quality:.96},html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['avoid-all','css','legacy']}}).from(h).save();
+    toast('⬇️ PDF downloaded');
+  }catch(e){ toast('❌ PDF: '+e.message, 3600); }
+  finally{ h.remove(); }
+}
+// ZIP writer
+function buildZip(files){
+  const parts=[],central=[]; let offset=0;
+  const now=new Date();
+  const dosTime=((now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1))&0xFFFF;
+  const dosDate=(((now.getFullYear()-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate())&0xFFFF;
+  files.forEach(f=>{
+    const nb=new TextEncoder().encode(f.name);
+    const d=f.data, crc=crc32(d);
+    const local=new Uint8Array(30+nb.length);
+    const lv=new DataView(local.buffer);
+    lv.setUint32(0,0x04034b50,true); lv.setUint16(4,20,true); lv.setUint16(6,0x0800,true);
+    lv.setUint16(8,0,true); lv.setUint16(10,dosTime,true); lv.setUint16(12,dosDate,true);
+    lv.setUint32(14,crc,true); lv.setUint32(18,d.length,true); lv.setUint32(22,d.length,true);
+    lv.setUint16(26,nb.length,true); lv.setUint16(28,0,true);
+    local.set(nb,30); parts.push(local,d);
+    const cd=new Uint8Array(46+nb.length);
+    const cv=new DataView(cd.buffer);
+    cv.setUint32(0,0x02014b50,true); cv.setUint16(4,20,true); cv.setUint16(6,20,true);
+    cv.setUint16(8,0x0800,true); cv.setUint16(10,0,true); cv.setUint16(12,dosTime,true);
+    cv.setUint16(14,dosDate,true); cv.setUint32(16,crc,true); cv.setUint32(20,d.length,true);
+    cv.setUint32(24,d.length,true); cv.setUint16(28,nb.length,true); cv.setUint16(30,0,true);
+    cv.setUint16(32,0,true); cv.setUint16(34,0,true); cv.setUint16(36,0,true);
+    cv.setUint32(38,0,true); cv.setUint32(42,offset,true);
+    cd.set(nb,46); central.push(cd);
+    offset+=local.length+d.length;
+  });
+  const cds=central.reduce((a,c)=>a+c.length,0);
+  const eocd=new Uint8Array(22); const ev=new DataView(eocd.buffer);
+  ev.setUint32(0,0x06054b50,true); ev.setUint16(4,0,true); ev.setUint16(6,0,true);
+  ev.setUint16(8,files.length,true); ev.setUint16(10,files.length,true);
+  ev.setUint32(12,cds,true); ev.setUint32(16,offset,true); ev.setUint16(20,0,true);
+  return new Blob([...parts,...central,eocd],{type:'application/zip'});
+}
+
+/* ============ OSINT HELPERS ============ */
+function showOut(el, html, isErr){ el.innerHTML=isErr?`<span class="err">❌ ${escapeHtml(html)}</span>`:html; el.classList.add('show'); }
+async function getJSON(url, opts){ const r=await fetch(url,opts); if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }
+
+/* MY IP */
+$('#myIpBtn').addEventListener('click', async()=>{
+  const out=$('#myIpOut'); out.classList.add('show');
+  out.innerHTML='<span class="spin"></span> Detecting…';
+  try{
+    const d=await getJSON('https://ipwho.is/');
+    if(!d.success) throw new Error(d.message||'Lookup failed');
+    let s='';
+    s+=kv('Public IP',d.ip)+'\n';
+    s+=kv('Type',d.type||'—')+'\n';
+    s+=kv('Country',`${d.country||'—'} ${d.country_code?'('+d.country_code+')':''}`)+'\n';
+    s+=kv('Region',d.region||'—')+'\n';
+    s+=kv('City',d.city||'—')+'\n';
+    s+=kv('Coordinates',`${d.latitude??'—'}, ${d.longitude??'—'}`)+'\n';
+    if(d.connection){
+      s+='\n<span class="k">── Connection ──</span>\n';
+      s+=kv('ASN',d.connection.asn??'—')+'\n';
+      s+=kv('ISP',d.connection.isp||'—')+'\n';
+      s+=kv('Organization',d.connection.org||'—')+'\n';
+    }
+    if(d.timezone){
+      s+='\n<span class="k">── Timezone ──</span>\n';
+      s+=kv('Zone',d.timezone.id||'—')+'\n';
+      s+=kv('Local Time',d.timezone.current_time||'—')+'\n';
+    }
+    out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+  }catch(e){ showOut(out,'Detection failed: '+e.message,true); }
+});
+
+/* IP / DOMAIN */
+$('#ipBtn').addEventListener('click', async()=>{
+  const q=$('#ipInput').value.trim();
+  const out=$('#ipOut');
+  if(!q){ toast('⚠️ Enter an IP or domain'); return; }
+  out.classList.add('show'); out.innerHTML='<span class="spin"></span> Checking…';
+  const isIP=/^(\d{1,3}\.){3}\d{1,3}$/.test(q) || /^[a-f0-9:]{8,}$/i.test(q);
+  try{
+    let d, domainName=null, resolvedIP=null;
+    if(isIP){
+      d=await getJSON('https://ipwho.is/'+encodeURIComponent(q));
+    } else {
+      const dns=await getJSON(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(q)}&type=A`,{headers:{'Accept':'application/dns-json'}});
+      const a=(dns.Answer||[]).find(r=>r.type===1);
+      if(!a) throw new Error('Could not resolve domain to IP');
+      resolvedIP=a.data; domainName=q;
+      d=await getJSON('https://ipwho.is/'+encodeURIComponent(resolvedIP));
+    }
+    if(!d.success) throw new Error(d.message||'Lookup failed');
+    let s='';
+    if(domainName){
+      s+=kv('Domain',domainName)+'\n';
+      s+=kv('Resolved IP',resolvedIP)+'\n\n';
+    }
+    s+=kv('IP',d.ip)+'\n';
+    s+=kv('Type',d.type||'—')+'\n';
+    s+=kv('Continent',`${d.continent||'—'} (${d.continent_code||'—'})`)+'\n';
+    s+=kv('Country',`${d.country||'—'} ${d.country_code?'('+d.country_code+')':''}`)+'\n';
+    s+=kv('State/Province',d.region||'—')+'\n';
+    s+=kv('City',d.city||'—')+'\n';
+    s+=kv('Postal',d.postal||'—')+'\n';
+    s+=kv('Coordinates',`${d.latitude??'—'}, ${d.longitude??'—'}`)+'\n';
+    if(d.connection){
+      s+='\n<span class="k">── Connection ──</span>\n';
+      s+=kv('ASN',d.connection.asn??'—')+'\n';
+      s+=kv('ISP',d.connection.isp||'—')+'\n';
+      s+=kv('Organization',d.connection.org||'—')+'\n';
+      s+=kv('Domain',d.connection.domain||'—')+'\n';
+    }
+    if(d.timezone){
+      s+='\n<span class="k">── Timezone ──</span>\n';
+      s+=kv('Region',d.timezone.id||'—')+'\n';
+      s+=kv('Current Time',d.timezone.current_time||'—')+'\n';
+    }
+    out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+  }catch(e){ showOut(out,'Lookup failed: '+e.message,true); }
+});
+
+/* DNS */
+$('#dnsBtn').addEventListener('click', async()=>{
+  const name=$('#dnsInput').value.trim();
+  const type=$('#dnsType').value;
+  const out=$('#dnsOut');
+  if(!name){ toast('⚠️ Enter a domain'); return; }
+  out.classList.add('show'); out.innerHTML='<span class="spin"></span> Querying…';
+  try{
+    const d=await getJSON(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(name)}&type=${type}`,{headers:{'Accept':'application/dns-json'}});
+    if(!d.Answer&&!d.Authority){ showOut(out,'No records found (Status: '+(d.Status??'?')+')',true); return; }
+    let s=`<span class="k">Domain:</span> ${escapeHtml(name)}\n<span class="k">Type:</span> ${escapeHtml(type)}\n`;
+    s+=`<span class="k">Status:</span> ${d.Status===0?'<span class="ok">NOERROR ✅</span>':'Code '+d.Status}\n`;
+    s+=`<span class="k">Records:</span> ${(d.Answer||[]).length}\n\n`;
+    (d.Answer||[]).forEach((r,i)=>{
+      s+=`${i+1}. <span class="k">${escapeHtml(r.name)}</span>\n   TTL: ${r.TTL}  |  Type: ${r.type}\n   → ${escapeHtml(r.data)}\n\n`;
+    });
+    if(d.Authority&&d.Authority.length){
+      s+='<span class="k">── Authority ──</span>\n';
+      d.Authority.forEach(r=>{s+=`${escapeHtml(r.name)} → ${escapeHtml(r.data)}\n`;});
+    }
+    out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+  }catch(e){ showOut(out,'DNS query failed: '+e.message,true); }
+});
+
+/* WHOIS / RDAP */
+$('#whoisBtn').addEventListener('click', async()=>{
+  const d=$('#whoisInput').value.trim().replace(/^https?:\/\//,'').split('/')[0];
+  const out=$('#whoisOut');
+  if(!d){ toast('⚠️ Enter a domain'); return; }
+  out.classList.add('show'); out.innerHTML='<span class="spin"></span> RDAP query…';
+  try{
+    const j=await getJSON('https://rdap.org/domain/'+encodeURIComponent(d));
+    const ev={}; (j.events||[]).forEach(e=>{ev[e.eventAction]=e.eventDate;});
+    let s='';
+    s+=kv('Domain',j.ldhName||d)+'\n';
+    s+=kv('Handle',j.handle||'—')+'\n';
+    s+=kv('Status',(j.status||[]).join(', ')||'—')+'\n\n';
+    s+='<span class="k">── Dates ──</span>\n';
+    s+=kv('Registration',ev.registration?new Date(ev.registration).toLocaleString():'—')+'\n';
+    s+=kv('Expiration',ev.expiration?new Date(ev.expiration).toLocaleString():'—')+'\n';
+    s+=kv('Last Updated',ev['last changed']?new Date(ev['last changed']).toLocaleString():'—')+'\n\n';
+    s+='<span class="k">── Nameservers ──</span>\n';
+    (j.nameservers||[]).forEach((n,i)=>{s+=`${i+1}. ${n.ldhName}\n`;});
+    if(j.entities){
+      s+='\n<span class="k">── Contacts ──</span>\n';
+      j.entities.forEach(e=>{
+        const roles=(e.roles||[]).join(', ');
+        const v=(e.vcardArray&&e.vcardArray[1])||[];
+        const fn=v.find(x=>x[0]==='fn');
+        s+=`${roles||'entity'}: ${fn?fn[3]:(e.handle||'—')}\n`;
+      });
+    }
+    out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+  }catch(e){ showOut(out,'RDAP query failed: '+e.message,true); }
+});
+
+/* SSL INFO (uses crt.sh) */
+$('#sslBtn').addEventListener('click', async()=>{
+  const d=$('#sslInput').value.trim().replace(/^https?:\/\//,'').split('/')[0];
+  const out=$('#sslOut');
+  if(!d){ toast('⚠️ Enter a domain'); return; }
+  out.classList.add('show'); out.innerHTML='<span class="spin"></span> Querying crt.sh…';
+  try{
+    const arr=await getJSON('https://crt.sh/?q='+encodeURIComponent(d)+'&output=json');
+    if(!Array.isArray(arr)||!arr.length){ showOut(out,'No SSL certificates found for this domain.',true); return; }
+    const unique={};
+    arr.forEach(c=>{ if(!unique[c.serial_number]) unique[c.serial_number]=c; });
+    const list=Object.values(unique).slice(0,10);
+    let s=`<span class="k">Domain:</span> ${escapeHtml(d)}\n`;
+    s+=`<span class="k">Total certs found:</span> ${Object.keys(unique).length}\n\n`;
+    list.forEach((c,i)=>{
+      s+=`${i+1}. <span class="k">${escapeHtml(c.common_name||c.name_value)}</span>\n`;
+      s+=`   Issuer: ${escapeHtml(c.issuer_name||'—')}\n`;
+      s+=`   Valid from: ${escapeHtml(c.not_before||'—')}\n`;
+      s+=`   Valid to:   ${escapeHtml(c.not_after||'—')}\n\n`;
+    });
+    out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+  }catch(e){ showOut(out,'SSL lookup failed: '+e.message,true); }
+});
+
+/* TECHNOLOGY DETECTOR (heuristic via headers) */
+$('#techBtn').addEventListener('click', async()=>{
+  let d=$('#techInput').value.trim().replace(/^https?:\/\//,'').split('/')[0];
+  const out=$('#techOut');
+  if(!d){ toast('⚠️ Enter a domain'); return; }
+  out.classList.add('show'); out.innerHTML='<span class="spin"></span> Detecting…';
+  try{
+    // use allorigins to fetch headers via response inspection
+    const url='https://'+d;
+    let html='', headers={};
+    try{
+      const r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent(url));
+      const j=await r.json();
+      html=j.contents||'';
+    }catch(e){}
+    let s=`<span class="k">Domain:</span> ${escapeHtml(d)}\n\n`;
+    const detections=[];
+    const checks=[
+      ['WordPress', /wp-content|wp-includes/i],
+      ['React', /react|__REACT_DEVTOOLS/i],
+      ['Vue.js', /vue\.js|vue\.min|__vue__/i],
+      ['Angular', /ng-version|angular/i],
+      ['Next.js', /_next\/static|__NEXT_DATA__/i],
+      ['Nuxt', /__NUXT__|_nuxt\//i],
+      ['jQuery', /jquery/i],
+      ['Bootstrap', /bootstrap/i],
+      ['Tailwind', /tailwind/i],
+      ['Cloudflare', /cloudflare/i],
+      ['Google Analytics', /gtag|google-analytics|googletagmanager/i],
+      ['Facebook Pixel', /connect\.facebook\.net/i],
+      ['Shopify', /cdn\.shopify\.com/i],
+      ['Wix', /wix\.com|wixstatic/i],
+      ['Squarespace', /squarespace/i],
+      ['Webflow', /webflow/i],
+      ['Ghost', /ghost\.org|ghost-cms/i],
+      ['Drupal', /drupal/i],
+      ['Joomla', /joomla/i]
+    ];
+    checks.forEach(([name,re])=>{ if(re.test(html)) detections.push(name); });
+    if(detections.length){
+      s+='<span class="ok">Detected technologies:</span>\n';
+      detections.forEach(t=>{ s+='• '+t+'\n'; });
+    } else {
+      s+='<span class="k">No common technologies detected</span> (or site blocks fetching).\n';
+    }
+    out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+  }catch(e){ showOut(out,'Detection failed: '+e.message,true); }
+});
+
+/* USERNAME SCANNER */
+const PRIORITY_SITES=[
+  {name:'GitHub',cat:'Developer',auto:true,url:'https://github.com/{u}',api:'https://api.github.com/users/{u}',check:d=>d&&d.login},
+  {name:'GitLab',cat:'Developer',auto:true,url:'https://gitlab.com/{u}',api:'https://gitlab.com/api/v4/users?username={u}',check:d=>Array.isArray(d)&&d.length>0},
+  {name:'Dev.to',cat:'Developer',auto:true,url:'https://dev.to/{u}',api:'https://dev.to/api/users/by_username?url={u}',check:d=>d&&d.username},
+  {name:'Codeberg',cat:'Developer',auto:true,url:'https://codeberg.org/{u}',api:'https://codeberg.org/api/v1/users/{u}',check:d=>d&&d.login},
+  {name:'Chess.com',cat:'Gaming',auto:true,url:'https://chess.com/member/{u}',api:'https://api.chess.com/pub/player/{u}',check:d=>d&&d.username},
+  {name:'Lichess',cat:'Gaming',auto:true,url:'https://lichess.org/@/{u}',api:'https://lichess.org/api/user/{u}',check:d=>d&&d.username},
+  {name:'Keybase',cat:'Developer',auto:true,url:'https://keybase.io/{u}',api:'https://keybase.io/_/api/1.0/user/lookup.json?username={u}',check:d=>d&&d.status&&d.status.code===0&&Array.isArray(d.them)&&d.them[0]&&d.them[0].id},
+  {name:'Roblox',cat:'Gaming',auto:true,url:'https://www.roblox.com/user.aspx?username={u}',api:'https://users.roblox.com/v1/usernames/users',apiPost:true,check:d=>d&&d.data&&d.data.length>0},
+  {name:'HackerNews',cat:'Developer',auto:true,url:'https://news.ycombinator.com/user?id={u}',api:'https://hacker-news.firebaseio.com/v0/user/{u}.json',check:d=>d&&d.id},
+  {name:'Wikipedia',cat:'Other',auto:true,url:'https://en.wikipedia.org/wiki/User:{u}',api:'https://en.wikipedia.org/w/api.php?action=query&list=users&ususers={u}&format=json&origin=*',check:d=>d&&d.query&&d.query.users&&d.query.users[0]&&d.query.users[0].userid},
+  {name:'npm',cat:'Developer',auto:true,url:'https://www.npmjs.com/~{u}',api:'https://registry.npmjs.org/-/user/org.couchdb.user:{u}',check:d=>d&&d.name},
+  {name:'Instagram',cat:'Social',auto:false,priority:true,url:'https://instagram.com/{u}'},
+  {name:'Facebook',cat:'Social',auto:false,priority:true,url:'https://facebook.com/{u}'},
+  {name:'Twitter / X',cat:'Social',auto:false,priority:true,url:'https://x.com/{u}'},
+  {name:'Reddit',cat:'Social',auto:false,priority:true,url:'https://reddit.com/user/{u}'},
+  {name:'TikTok',cat:'Social',auto:false,priority:true,url:'https://tiktok.com/@{u}'},
+  {name:'YouTube',cat:'Video',auto:false,priority:true,url:'https://youtube.com/@{u}'},
+  {name:'Telegram',cat:'Chat',auto:false,priority:true,url:'https://t.me/{u}'},
+  {name:'LinkedIn',cat:'Professional',auto:false,priority:true,url:'https://linkedin.com/in/{u}'},
+  {name:'Snapchat',cat:'Social',auto:false,priority:true,url:'https://snapchat.com/add/{u}'},
+  {name:'Pinterest',cat:'Social',auto:false,priority:true,url:'https://pinterest.com/{u}'},
+  {name:'Twitch',cat:'Gaming',auto:false,priority:true,url:'https://twitch.tv/{u}'},
+  {name:'Steam',cat:'Gaming',auto:false,priority:true,url:'https://steamcommunity.com/id/{u}'},
+  {name:'Spotify',cat:'Music',auto:false,url:'https://open.spotify.com/user/{u}'},
+  {name:'Medium',cat:'Writing',auto:false,url:'https://medium.com/@{u}'},
+  {name:'Behance',cat:'Creative',auto:false,url:'https://behance.net/{u}'},
+  {name:'Dribbble',cat:'Creative',auto:false,url:'https://dribbble.com/{u}'},
+  {name:'SoundCloud',cat:'Music',auto:false,url:'https://soundcloud.com/{u}'},
+  {name:'Vimeo',cat:'Video',auto:false,url:'https://vimeo.com/{u}'},
+  {name:'Flickr',cat:'Photos',auto:false,url:'https://flickr.com/people/{u}'}
+];
+const WMN_URL='https://raw.githubusercontent.com/WebBreacher/WhatsMyName/main/wmn-data.json';
+let WMN_CACHE=null, unameResults={}, unameScanAbort=null;
+function getProfileUrl(site,u){ return site.url.replace('{u}', encodeURIComponent(u)); }
+function getDomain(site){ try{ return new URL(site.url.replace('{u}','x')).hostname; }catch(e){ return ''; } }
+async function checkAutoSite(site, username, signal){
+  const api=site.api.replace('{u}', encodeURIComponent(username));
+  const opts={signal, cache:'no-store'};
+  if(site.apiPost){
+    opts.method='POST'; opts.headers={'Content-Type':'application/json'};
+    opts.body=JSON.stringify({usernames:[username], excludeBannedUsers:false});
+  }
+  try{
+    const r=await fetch(api, opts);
+    if(r.status===404) return 'miss';
+    if(!r.ok) return 'unk';
+    const d=await r.json();
+    return site.check(d)?'found':'miss';
+  }catch(e){ return 'unk'; }
+}
+function renderCard(site, status, username){
+  const url=getProfileUrl(site,username);
+  const domain=getDomain(site);
+  const initial=(site.name||'?').charAt(0).toUpperCase();
+  const fav=domain?`<img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=32" onerror="this.replaceWith('${initial}')" alt="">`:initial;
+  const star=site.priority?'<span class="star">★</span>':'';
+  return `<div class="uname-card ${status}"><div class="fav">${fav}</div><div class="info"><div class="nm">${star}${escapeHtml(site.name)}</div><div class="ct">${escapeHtml(site.cat)}</div></div><a class="go" href="${escapeHtml(url)}" target="_blank" rel="noopener">↗</a></div>`;
+}
+function renderSection(title, status, sites, username, collapsed){
+  const color=status==='found'?'var(--ok)':status==='miss'?'var(--danger)':status==='pending'?'var(--accent)':'var(--warn)';
+  const cards=sites.map(s=>renderCard(s,status,username)).join('');
+  return `<div class="uname-section ${collapsed?'collapsed':''}" data-count="${sites.length}"><div class="sh"><span class="dot" style="background:${color}"></span><span>${title}</span><span class="cnt">${sites.length}</span><button class="toggle">${collapsed?`Show ${sites.length} ▼`:'Hide ▲'}</button></div><div class="uname-grid">${cards}</div></div>`;
+}
+function renderUnameResults(){
+  const c=$('#unameResults');
+  const u=$('#unameInput').value.trim().replace(/^@/,'');
+  if(!u){ c.innerHTML=''; return; }
+  const found=[],unk=[],miss=[],pending=[];
+  PRIORITY_SITES.forEach(s=>{
+    const st=unameResults[s.name];
+    if(st==='found') found.push(s);
+    else if(st==='miss') miss.push(s);
+    else if(st==='unk') unk.push(s);
+    else pending.push(s);
+  });
+  let html='';
+  if(found.length) html+=renderSection('Found','found',found,u,false);
+  if(pending.length) html+=renderSection('Scanning…','pending',pending,u,false);
+  if(unk.length) html+=renderSection('Manual Check','unk',unk,u,unk.length>24);
+  if(miss.length) html+=renderSection('Not Found','miss',miss,u,miss.length>6);
+  if(!html) html='<div class="empty"><span class="ico">🤷</span>No results.</div>';
+  c.innerHTML=html;
+  c.querySelectorAll('.uname-section .toggle').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const sec=btn.closest('.uname-section');
+      sec.classList.toggle('collapsed');
+      btn.textContent=sec.classList.contains('collapsed')?`Show ${sec.dataset.count} ▼`:'Hide ▲';
+    });
+  });
+}
+function updateScanStats(){
+  let found=0,miss=0,unk=0,pending=0;
+  PRIORITY_SITES.forEach(s=>{
+    const st=unameResults[s.name];
+    if(st==='found') found++;
+    else if(st==='miss') miss++;
+    else if(st==='unk') unk++;
+    else pending++;
+  });
+  $('#statFound').textContent=found;
+  $('#statMiss').textContent=miss;
+  $('#statUnk').textContent=unk;
+  $('#statTotal').textContent=PRIORITY_SITES.length;
+  $('#unameSummary').style.display='grid';
+  $('#unameStats').innerHTML=`<span style="color:var(--ok)">● ${found} found</span> &nbsp; <span style="color:var(--danger)">● ${miss} miss</span> &nbsp; <span style="color:var(--warn)">● ${unk} manual</span>`;
+}
+$('#unameBtn').addEventListener('click', async()=>{
+  const u=$('#unameInput').value.trim().replace(/^@/,'');
+  if(!u){ toast('⚠️ Enter a username'); return; }
+  if(unameScanAbort) unameScanAbort.abort();
+  unameScanAbort=new AbortController();
+  const btn=$('#unameBtn'); btn.disabled=true;
+  unameResults={};
+  PRIORITY_SITES.forEach(s=>{unameResults[s.name]='pending';});
+  $('#unameProgress').classList.add('show');
+  $('#unameMeta').style.display='flex';
+  $('#unameActions').style.display='flex';
+  $('#unameSummary').style.display='grid';
+  $('#unameBar').style.width='0%';
+  renderUnameResults(); updateScanStats();
+  const autoSites=PRIORITY_SITES.filter(s=>s.auto);
+  toast(`🚀 Scanning ${autoSites.length} platforms…`, 2500);
+  let done=0;
+  await Promise.all(autoSites.map(async site=>{
+    if(unameScanAbort.signal.aborted) return;
+    unameResults[site.name]=await checkAutoSite(site, u, unameScanAbort.signal);
+    done++;
+    const pct=Math.round((done/autoSites.length)*100);
+    $('#unameBar').style.width=pct+'%';
+    $('#unameCounter').textContent=`${done} / ${autoSites.length} auto-checked`;
+    updateScanStats(); renderUnameResults();
+  }));
+  PRIORITY_SITES.forEach(s=>{ if(!s.auto) unameResults[s.name]='unk'; });
+  $('#unameBar').style.width='100%';
+  renderUnameResults(); updateScanStats();
+  btn.disabled=false;
+  toast('✅ Scan complete', 3000);
+  setTimeout(()=>{ $('#unameProgress').classList.remove('show'); }, 800);
+});
+$('#unameReset').addEventListener('click',()=>{
+  if(unameScanAbort) unameScanAbort.abort();
+  unameResults={};
+  $('#unameInput').value='';
+  $('#unameResults').innerHTML='';
+  $('#unameMeta').style.display='none';
+  $('#unameActions').style.display='none';
+  $('#unameSummary').style.display='none';
+  $('#unameProgress').classList.remove('show');
+  $('#unameAdvanced').innerHTML='';
+  toast('🗑️ Cleared');
+});
+$('#unameCsv').addEventListener('click',()=>{
+  const u=$('#unameInput').value.trim().replace(/^@/,'');
+  if(!u){ toast('⚠️ Run a scan first'); return; }
+  const rows=[['Platform','Category','Status','Profile URL']];
+  PRIORITY_SITES.forEach(s=>{ rows.push([s.name,s.cat,unameResults[s.name]||'pending',getProfileUrl(s,u)]); });
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const stamp=new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+  downloadBlob(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}), `glsorun-${u}-${stamp}.csv`);
+  toast('⬇️ CSV exported');
+});
+$('#unameAdvancedBtn').addEventListener('click', async()=>{
+  const box=$('#unameAdvanced');
+  const u=$('#unameInput').value.trim().replace(/^@/,'');
+  if(!u){ toast('⚠️ Enter a username first'); return; }
+  if(WMN_CACHE){ renderAdvanced(WMN_CACHE,u); return; }
+  box.innerHTML='<div class="empty"><span class="spin"></span> Loading directory…</div>';
+  try{
+    const r=await fetch(WMN_URL);
+    if(!r.ok) throw new Error('Failed to load');
+    const j=await r.json();
+    WMN_CACHE=(j.sites||[]).filter(s=>s.uri_check);
+    renderAdvanced(WMN_CACHE,u);
+  }catch(e){ box.innerHTML=`<div class="empty"><span class="ico">⚠️</span>Could not load: ${escapeHtml(e.message)}</div>`; }
+});
+function renderAdvanced(sites, username){
+  const box=$('#unameAdvanced');
+  const cats={}; sites.forEach(s=>{const c=s.cat||'other';cats[c]=(cats[c]||0)+1;});
+  const topCats=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  let filter='all';
+  const render=()=>{
+    let list=sites;
+    if(filter!=='all') list=list.filter(s=>(s.cat||'other')===filter);
+    const cards=list.slice(0,200).map(s=>{
+      const url=s.uri_check.replace('{account}', encodeURIComponent(username));
+      const dom=(()=>{try{return new URL(url).hostname;}catch{return '';}})();
+      const ini=(s.name||'?').charAt(0).toUpperCase();
+      const fav=dom?`<img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(dom)}&sz=32" onerror="this.replaceWith('${ini}')" alt="">`:ini;
+      return `<div class="uname-card unk"><div class="fav">${fav}</div><div class="info"><div class="nm">${escapeHtml(s.name||'?')}</div><div class="ct">${escapeHtml(s.cat||'other')}</div></div><a class="go" href="${escapeHtml(url)}" target="_blank" rel="noopener">↗</a></div>`;
+    }).join('');
+    const chips=['all',...topCats.map(([c])=>c)].map(c=>`<button class="chip ${filter===c?'active':''}" data-f="${escapeHtml(c)}">${c==='all'?'All':escapeHtml(c)} <span style="opacity:.55">${c==='all'?sites.length:cats[c]}</span></button>`).join('');
+    box.innerHTML=`<div class="chips">${chips}</div><div style="font-size:11.5px;color:var(--muted);margin:10px 0">Showing ${Math.min(200,list.length)} of ${list.length}</div><div class="uname-grid">${cards}</div>`;
+    box.querySelectorAll('.chip').forEach(c=>{ c.addEventListener('click',()=>{filter=c.dataset.f;render();}); });
+  };
+  render();
+}
+
+/* EMAIL */
+$('#emailBtn').addEventListener('click',()=>{
+  const email=$('#emailInput').value.trim();
+  const out=$('#emailOut'), links=$('#emailLinks'); links.innerHTML='';
+  if(!email){ toast('⚠️ Enter an email'); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showOut(out,'Invalid email format',true); return; }
+  const [local,domain]=email.split('@');
+  const hash=md5(email.trim().toLowerCase());
+  let s='';
+  s+=kv('Email',email)+'\n';
+  s+=kv('Local Part',local)+'\n';
+  s+=kv('Domain',domain)+'\n';
+  s+=kv('MD5 Hash',hash)+'\n';
+  s+=kv('Gravatar',`https://www.gravatar.com/avatar/${hash}?d=404`)+'\n';
+  out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+  out.classList.add('show');
+  const list=[
+    ['Gravatar',`https://www.gravatar.com/avatar/${hash}?d=404`],
+    ['Have I Been Pwned',`https://haveibeenpwned.com/account/${encodeURIComponent(email)}`],
+    ['Firefox Monitor','https://monitor.mozilla.org/'],
+    ['DeHashed','https://dehashed.com/'],
+    ['IntelX','https://intelx.io/'],
+    ['Google Search',`https://www.google.com/search?q=${encodeURIComponent('"'+email+'"')}`],
+    ['Epieos',`https://epieos.com/?q=${encodeURIComponent(email)}`],
+    ['Hunter.io','https://hunter.io/']
+  ];
+  list.forEach(([n,u])=>{ const a=document.createElement('a'); a.className='link'; a.href=u; a.target='_blank'; a.rel='noopener'; a.textContent=n; links.appendChild(a); });
+});
+
+/* PHONE */
+$('#phoneBtn').addEventListener('click',()=>{
+  const raw=$('#phoneInput').value.trim();
+  const out=$('#phoneOut'), links=$('#phoneLinks'); links.innerHTML='';
+  if(!raw){ toast('⚠️ Enter a phone number'); return; }
+  if(typeof libphonenumber==='undefined'){ showOut(out,'libphonenumber-js failed to load. Check internet.',true); return; }
+  let parsed=null, usedCountry=null;
+  try{
+    if(raw.startsWith('+')) parsed=libphonenumber.parsePhoneNumberFromString(raw);
+    else{
+      for(const c of ['IN','US','GB','AE']){
+        const p=libphonenumber.parsePhoneNumberFromString(raw,c);
+        if(p&&p.isValid()){parsed=p;usedCountry=c;break;}
+      }
+      if(!parsed){parsed=libphonenumber.parsePhoneNumberFromString(raw,'IN');usedCountry='IN';}
+    }
+  }catch(e){ showOut(out,'Could not parse: '+e.message,true); return; }
+  if(!parsed||!parsed.isPossible()){ showOut(out,'Not a recognisable phone number.',true); return; }
+  const valid=parsed.isValid();
+  let type='UNKNOWN'; try{ type=parsed.getType()||'UNKNOWN'; }catch(e){}
+  const TYPE_HUMAN={MOBILE:'Mobile',FIXED_LINE:'Landline',FIXED_LINE_OR_MOBILE:'Landline / Mobile',VOIP:'VoIP',PREMIUM_RATE:'Premium rate',TOLL_FREE:'Toll free',PERSONAL_NUMBER:'Personal number',PAGER:'Pager',UAN:'UAN',VOICEMAIL:'Voicemail',UNKNOWN:'Unknown'};
+  const e164=parsed.number;
+  let s='';
+  s+=kv('Input',raw)+'\n';
+  s+=kv('Valid',valid?'Yes ✅':'No ⚠️')+'\n';
+  s+=kv('Country',parsed.country||'—')+'\n';
+  s+=kv('Calling Code','+'+parsed.countryCallingCode)+'\n';
+  s+=kv('National Number',parsed.nationalNumber)+'\n';
+  s+=kv('Line Type',TYPE_HUMAN[type]||type)+'\n';
+  s+=kv('E.164',e164)+'\n';
+  s+=kv('International',parsed.formatInternational())+'\n';
+  s+=kv('National',parsed.formatNational())+'\n';
+  if(usedCountry) s+=kv('Assumed Country',usedCountry)+'\n';
+  out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+  out.classList.add('show');
+  const digits=e164.replace(/\D/g,'');
+  const cc=(parsed.country||'in').toLowerCase();
+  const list=[
+    ['WhatsApp',`https://wa.me/${digits}`],
+    ['Telegram',`https://t.me/${e164}`],
+    ['Truecaller',`https://www.truecaller.com/search/${cc}/${digits}`],
+    ['Google',`https://www.google.com/search?q=${encodeURIComponent('"'+e164+'"')}`],
+    ['Sync.me',`https://sync.me/search/?number=${digits}`],
+    ['Numlookup','https://www.numlookup.com/'],
+    ['SpyDialer','https://spydialer.com/']
+  ];
+  list.forEach(([n,u])=>{ const a=document.createElement('a'); a.className='link'; a.href=u; a.target='_blank'; a.rel='noopener'; a.textContent=n; links.appendChild(a); });
+});
+
+/* SOCIAL ANALYZER */
+$('#socialBtn').addEventListener('click', async()=>{
+  const u=$('#socialInput').value.trim().replace(/^@/,'');
+  const out=$('#socialOut');
+  if(!u){ toast('⚠️ Enter a username'); return; }
+  out.classList.add('show'); out.innerHTML='<span class="spin"></span> Analyzing…';
+  const results=[];
+  const checks=[
+    {name:'GitHub', api:'https://api.github.com/users/'+encodeURIComponent(u), fields:d=>({Name:d.name||'—',Bio:(d.bio||'').slice(0,80),Followers:d.followers,Repos:d.public_repos,Joined:d.created_at?new Date(d.created_at).toLocaleDateString():'—',URL:d.html_url})},
+    {name:'Reddit', api:'https://www.reddit.com/user/'+encodeURIComponent(u)+'/about.json', fields:d=>{const x=d.data;return {Name:x.name,Karma:x.total_karma||0,Created:x.created_utc?new Date(x.created_utc*1000).toLocaleDateString():'—',URL:'https://reddit.com/user/'+x.name};}},
+    {name:'Dev.to', api:'https://dev.to/api/users/by_username?url='+encodeURIComponent(u), fields:d=>({Name:d.name||'—',Bio:(d.summary||'').slice(0,80),URL:'https://dev.to/'+d.username})},
+    {name:'Codeberg', api:'https://codeberg.org/api/v1/users/'+encodeURIComponent(u), fields:d=>({Name:d.full_name||d.login,Followers:d.followers_count,Following:d.following_count,Joined:d.created?new Date(d.created).toLocaleDateString():'—',URL:'https://codeberg.org/'+d.login})},
+    {name:'Lichess', api:'https://lichess.org/api/user/'+encodeURIComponent(u), fields:d=>({Name:d.username,URL:'https://lichess.org/@/'+d.username})},
+    {name:'Chess.com', api:'https://api.chess.com/pub/player/'+encodeURIComponent(u), fields:d=>({Name:d.name||d.username,Joined:d.joined?new Date(d.joined*1000).toLocaleDateString():'—',URL:d.url||'https://chess.com/member/'+d.username})},
+    {name:'HackerNews', api:'https://hacker-news.firebaseio.com/v0/user/'+encodeURIComponent(u)+'.json', fields:d=>({Name:d.id,Karma:d.karma,Created:d.created?new Date(d.created*1000).toLocaleDateString():'—',URL:'https://news.ycombinator.com/user?id='+d.id})}
+  ];
+  for(const c of checks){
+    try{
+      const r=await fetch(c.api, {cache:'no-store'});
+      if(!r.ok){ results.push({name:c.name, status:'not found'}); continue; }
+      const d=await r.json();
+      results.push({name:c.name, status:'found', data:c.fields(d)});
+    }catch(e){ results.push({name:c.name, status:'error'}); }
+  }
+  let s='';
+  results.forEach(r=>{
+    if(r.status==='found'){
+      s+=`<span class="ok">✅ ${r.name}</span>\n`;
+      Object.entries(r.data).forEach(([k,v])=>{ s+=`   ${k}: ${escapeHtml(String(v))}\n`; });
+      s+='\n';
+    } else if(r.status==='not found'){
+      s+=`<span class="k">⚪ ${r.name}: not found</span>\n\n`;
+    } else {
+      s+=`<span class="err">⚠️ ${r.name}: error</span>\n\n`;
+    }
+  });
+  out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${s||'No public data found.'}</pre>`;
+});
+
+/* WAYBACK */
+$('#wbBtn').addEventListener('click', async()=>{
+  let url=$('#wbInput').value.trim(), out=$('#wbOut');
+  if(!url){ toast('⚠️ Enter a URL'); return; }
+  if(!/^https?:\/\//i.test(url)) url='http://'+url;
+  out.classList.add('show'); out.innerHTML='<span class="spin"></span> Searching archive…';
+  try{
+    const d=await getJSON('https://archive.org/wayback/available?url='+encodeURIComponent(url));
+    if(!d.archived_snapshots||!d.archived_snapshots.closest){ showOut(out,'No snapshot found.',true); return; }
+    const s=d.archived_snapshots.closest;
+    let r='<span class="ok">✅ Snapshot found!</span>\n\n';
+    r+=kv('Archive URL',s.url)+'\n';
+    r+=kv('Timestamp',s.timestamp)+'\n';
+    r+=kv('Status',s.status)+'\n';
+    r+=kv('Available',s.available?'Yes':'No')+'\n';
+    out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${r}</pre>`;
+  }catch(e){ showOut(out,'Search failed: '+e.message,true); }
+});
+
+/* REVERSE IMAGE */
+$('#imgUrlBtn').addEventListener('click',()=>{
+  let u=$('#imgUrlInput').value.trim();
+  if(!u){ toast('⚠️ Enter an image URL'); return; }
+  if(!/^https?:\/\//i.test(u)) u='https://'+u;
+  const e=encodeURIComponent(u);
+  const list=[
+    ['Google Lens',`https://lens.google.com/uploadbyurl?url=${e}`],
+    ['Yandex',`https://yandex.com/images/search?rpt=imageview&url=${e}`],
+    ['Bing Visual',`https://www.bing.com/images/search?view=detailv2&iss=sbi&form=SBIVSP&q=imgurl:${e}`],
+    ['TinEye',`https://tineye.com/search?url=${e}`],
+    ['PimEyes','https://pimeyes.com/en'],
+    ['Baidu',`https://graph.baidu.com/upload?image=${e}`],
+    ['Karma Decay',`http://karmadecay.com/search?q=${e}`]
+  ];
+  const box=$('#imgLinks'); box.innerHTML='';
+  list.forEach(([n,url])=>{ const a=document.createElement('a'); a.className='link'; a.href=url; a.target='_blank'; a.rel='noopener'; a.textContent=n; box.appendChild(a); });
+  toast('🔍 Links ready');
+});
+
+/* SPEED TEST */
+$('#speedBtn').addEventListener('click', async()=>{
+  const sizeMB=parseInt($('#speedSize').value,10);
+  const dlBytes=sizeMB*1024*1024;
+  const ulBytes=Math.max(1,Math.round(sizeMB*0.5))*1024*1024;
+  const btn=$('#speedBtn'), prog=$('#speedProgress'), bar=$('#speedBar'), meta=$('#speedMeta');
+  const stage=$('#speedStage'), pct=$('#speedPercent');
+  btn.disabled=true; prog.classList.add('show'); meta.style.display='flex';
+  bar.style.width='0%'; pct.textContent='0%';
+  $('#dlNum').textContent='—'; $('#ulNum').textContent='—'; $('#pingNum').textContent='—';
+  $('#speedOut').classList.remove('show');
+  const setPct=p=>{ bar.style.width=p+'%'; pct.textContent=Math.round(p)+'%'; };
+  try{
+    stage.textContent='Measuring latency…'; setPct(0);
+    const pings=[];
+    for(let i=0;i<5;i++){
+      const t0=performance.now();
+      await fetch('https://speed.cloudflare.com/__down?bytes=0&r='+Math.random(),{cache:'no-store'});
+      pings.push(performance.now()-t0);
+      setPct((i+1)*4);
+    }
+    pings.sort((a,b)=>a-b);
+    const pingMs=pings[Math.floor(pings.length/2)];
+    $('#pingNum').textContent=pingMs.toFixed(0);
+    stage.textContent='Testing download…'; setPct(20);
+    const dStart=performance.now();
+    const dr=await fetch('https://speed.cloudflare.com/__down?bytes='+dlBytes,{cache:'no-store'});
+    const reader=dr.body.getReader();
+    let received=0;
+    while(true){
+      const {done,value}=await reader.read();
+      if(done) break;
+      received+=value.byteLength;
+      setPct(Math.min(65,20+(received/dlBytes)*45));
+    }
+    const dlMbps=(received*8)/((performance.now()-dStart)/1000)/1e6;
+    $('#dlNum').textContent=dlMbps.toFixed(1);
+    setPct(65);
+    stage.textContent='Testing upload…';
+    const payload=new Uint8Array(ulBytes);
+    for(let i=0;i<payload.length;i+=65536) crypto.getRandomValues(payload.subarray(i,Math.min(i+65536,payload.length)));
+    const uStart=performance.now();
+    await fetch('https://speed.cloudflare.com/__up',{method:'POST',body:payload,cache:'no-store'});
+    const ulMbps=(payload.length*8)/((performance.now()-uStart)/1000)/1e6;
+    $('#ulNum').textContent=ulMbps.toFixed(1);
+    setPct(100);
+    stage.textContent='Done ✅';
+    showOut($('#speedOut'),
+      `<span class="k">Download:</span> ${dlMbps.toFixed(2)} Mbps\n`+
+      `<span class="k">Upload:</span> ${ulMbps.toFixed(2)} Mbps\n`+
+      `<span class="k">Ping:</span> ${pingMs.toFixed(0)} ms\n`, false);
+    toast('⚡ Speed test finished');
+  }catch(e){
+    stage.textContent='Failed';
+    showOut($('#speedOut'),'Speed test failed: '+e.message,true);
+    toast('❌ Speed test error', 3200);
+  }finally{
+    btn.disabled=false;
+    setTimeout(()=>{ prog.classList.remove('show'); meta.style.display='none'; }, 1500);
+  }
+});
+
+/* DEEPFAKE (basic heuristic) */
+const dfDrop=$('#dfDrop'), dfInput=$('#dfInput');
+dfDrop.addEventListener('click',()=>dfInput.click());
+dfInput.addEventListener('change',e=>{if(e.target.files[0]) analyzeDeepfake(e.target.files[0]);});
+dfDrop.addEventListener('drop',e=>{e.preventDefault();dfDrop.classList.remove('drag');if(e.dataTransfer.files[0])analyzeDeepfake(e.dataTransfer.files[0]);});
+['dragenter','dragover'].forEach(ev=>dfDrop.addEventListener(ev,e=>{e.preventDefault();dfDrop.classList.add('drag');}));
+['dragleave'].forEach(ev=>dfDrop.addEventListener(ev,()=>dfDrop.classList.remove('drag')));
+
+async function analyzeDeepfake(file){
+  const out=$('#dfOut');
+  out.classList.add('show'); out.innerHTML='<span class="spin"></span> Analyzing…';
+  try{
+    const buf=await file.arrayBuffer();
+    const exif=parseExif(buf);
+    const png=parsePngText(buf);
+    const signals=[];
+    if(png&&png.length){
+      const aiKeys=png.filter(t=>/midjourney|stable.?diffusion|dall.?e|generated|ai/i.test(t.key+t.value));
+      if(aiKeys.length) signals.push('PNG text chunk mentions AI tool: '+aiKeys.map(x=>x.key).join(', '));
+    }
+    if(exif&&exif.ifd0&&exif.ifd0.Software){
+      const sw=String(exif.ifd0.Software.val);
+      if(/midjourney|dall.?e|stable|photoshop.*ai|firefly|generative/i.test(sw)) signals.push('Software field mentions AI: '+sw);
+    }
+    if(exif&&exif.ifd0&&exif.ifd0.Make){
+      const mk=String(exif.ifd0.Make.val);
+      if(/ai|midjourney|openai|stability/i.test(mk)) signals.push('Make field mentions: '+mk);
+    }
+    // Image dimension check — many AI images are 1024x1024, 512x512 etc.
+    const dims=await new Promise(res=>{const u=URL.createObjectURL(file);const i=new Image();i.onload=()=>{res({w:i.naturalWidth,h:i.naturalHeight});URL.revokeObjectURL(u);};i.onerror=()=>{res(null);URL.revokeObjectURL(u);};i.src=u;});
+    if(dims){
+      if(dims.w===dims.h && [512,768,1024,1536,2048].includes(dims.w)) signals.push('Square dimensions ('+dims.w+'×'+dims.h+') — common for AI generation');
+    }
+    let verdict='Likely real photo (no obvious AI signals)';
+    let color='var(--ok)';
+    if(signals.length>=2){ verdict='⚠️ Possibly AI-generated'; color='var(--danger)'; }
+    else if(signals.length===1){ verdict='Mixed signals — could be AI or edited'; color='var(--warn)'; }
+    let s=`<span class="k">File:</span> ${escapeHtml(file.name)}\n`;
+    s+=`<span class="k">Size:</span> ${humanSize(file.size)}\n`;
+    if(dims) s+=`<span class="k">Dimensions:</span> ${dims.w} × ${dims.h}\n`;
+    s+=`<span class="k">Verdict:</span> <b style="color:${color}">${verdict}</b>\n\n`;
+    if(signals.length){ s+='<span class="k">Signals:</span>\n'; signals.forEach(x=>{s+='• '+escapeHtml(x)+'\n';}); }
+    else { s+='<span class="k">No AI-generation signals found in metadata or dimensions.</span>\n'; }
+    s+='\n<span class="k">Note:</span> This is a heuristic check only. Not 100% accurate. For real detection, use specialised tools.\n';
+    out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+  }catch(e){ showOut(out,'Analysis failed: '+e.message,true); }
+}
+
+/* OSINT SEARCH FILTER */
+const osintSearch=$('#osintSearch');
+const allTools=$$('#osintTools .tool');
+$('#toolCountNum').textContent=allTools.length;
+osintSearch.addEventListener('input',()=>{
+  const q=osintSearch.value.toLowerCase().trim();
+  allTools.forEach(t=>{
+    const txt=(t.textContent+t.dataset.tool||'').toLowerCase();
+    t.style.display=txt.includes(q)?'':'none';
+  });
+});
+
+/* ============ UTILITIES ============ */
+/* HASH */
+$('#hashBtn').addEventListener('click', async()=>{
+  const text=$('#hashInput').value, out=$('#hashOut');
+  if(!text){ toast('⚠️ Enter some text'); return; }
+  out.classList.add('show'); out.innerHTML='<span class="spin"></span> Generating…';
+  const enc=new TextEncoder().encode(text);
+  let s=kv('Input Length',text.length+' chars, '+enc.length+' bytes')+'\n\n';
+  s+=kv('MD5',md5(text))+'\n';
+  try{
+    for(const [label,algo] of [['SHA-1','SHA-1'],['SHA-256','SHA-256'],['SHA-384','SHA-384'],['SHA-512','SHA-512']]){
+      const h=await crypto.subtle.digest(algo,enc);
+      s+=kv(label,[...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join(''))+'\n';
+    }
+  }catch(e){ s+='\n<span class="err">HTTPS required for SHA hashes.</span>\n'; }
+  out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${s}</pre>`;
+});
+
+/* ENCODE */
+$('#encBtn').addEventListener('click',()=>{
+  const text=$('#encInput').value, mode=$('#encMode').value, out=$('#encOut');
+  if(!text){ toast('⚠️ Enter some text'); return; }
+  out.classList.add('show');
+  let result='';
+  try{
+    switch(mode){
+      case 'b64e': result=btoa(unescape(encodeURIComponent(text))); break;
+      case 'b64d': result=decodeURIComponent(escape(atob(text.trim()))); break;
+      case 'urle': result=encodeURIComponent(text); break;
+      case 'urld': result=decodeURIComponent(text); break;
+      case 'hexe': result=[...new TextEncoder().encode(text)].map(b=>b.toString(16).padStart(2,'0')).join(' '); break;
+      case 'hexd': {
+        const clean=text.replace(/[^0-9a-fA-F]/g,'');
+        if(clean.length%2) throw new Error('Hex length is odd');
+        result=new TextDecoder().decode(new Uint8Array(clean.match(/.{2}/g).map(h=>parseInt(h,16)))); break;
+      }
+      case 'rot13': result=text.replace(/[a-zA-Z]/g,c=>String.fromCharCode((c<='Z'?90:122)>=c.charCodeAt(0)+13?c.charCodeAt(0)+13:c.charCodeAt(0)-13)); break;
+      case 'bin': result=[...new TextEncoder().encode(text)].map(b=>b.toString(2).padStart(8,'0')).join(' '); break;
+      case 'rev': result=[...text].reverse().join(''); break;
+    }
+  }catch(e){ showOut(out,'Decode failed: '+e.message,true); return; }
+  out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${escapeHtml(result)}</pre>`;
+});
+
+/* PASSWORD GENERATOR */
+$('#pwLen').addEventListener('input',e=>$('#pwLenVal').textContent=e.target.value);
+let pwValue='';
+$('#pwGen').addEventListener('click',()=>{
+  const len=parseInt($('#pwLen').value);
+  const upper=$('#pwUpper').checked, lower=$('#pwLower').checked, nums=$('#pwNum').checked, syms=$('#pwSym').checked, noSim=$('#pwNoSim').checked;
+  let chars='';
+  if(upper) chars+='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  if(lower) chars+='abcdefghijklmnopqrstuvwxyz';
+  if(nums) chars+='0123456789';
+  if(syms) chars+='!@#$%^&*()_+-=[]{}|;:,.<>?';
+  if(noSim) chars=chars.replace(/[il1Io0O]/g,'');
+  if(!chars){ toast('⚠️ Select at least one character type'); return; }
+  const arr=new Uint32Array(len);
+  crypto.getRandomValues(arr);
+  pwValue='';
+  for(let i=0;i<len;i++) pwValue+=chars[arr[i]%chars.length];
+  $('#pwDisplay').textContent=pwValue;
+  // Strength
+  let score=0;
+  if(len>=8) score+=1;
+  if(len>=12) score+=1;
+  if(len>=16) score+=1;
+  if(len>=24) score+=1;
+  if(upper&&lower) score+=1;
+  if(nums) score+=1;
+  if(syms) score+=1;
+  const pct=Math.min(100, score/7*100);
+  const fill=$('#pwFill');
+  fill.style.width=pct+'%';
+  let label, color;
+  if(score<=2){ label='Weak'; color='var(--danger)'; }
+  else if(score<=4){ label='Medium'; color='var(--warn)'; }
+  else if(score<=6){ label='Strong'; color='var(--ok)'; }
+  else { label='Very Strong'; color='var(--ok)'; }
+  fill.style.background=color;
+  $('#pwStrength').textContent=label+' ('+Math.round(pct)+'%)';
+  $('#pwStrength').style.color=color;
+});
+$('#pwCopy').addEventListener('click',()=>{
+  if(!pwValue){ toast('⚠️ Generate first'); return; }
+  navigator.clipboard.writeText(pwValue).then(()=>toast('📋 Copied!')).catch(()=>toast('❌ Copy failed'));
+});
+$('#pwDisplay').addEventListener('click',()=>{
+  if(!pwValue) return;
+  navigator.clipboard.writeText(pwValue).then(()=>toast('📋 Copied!')).catch(()=>{});
+});
+
+/* QR CODE */
+$('#qrGen').addEventListener('click', async()=>{
+  const text=$('#qrInput').value.trim();
+  if(!text){ toast('⚠️ Enter text or URL'); return; }
+  if(typeof QRCode==='undefined'){ toast('❌ QR library not loaded. Check internet.'); return; }
+  const size=parseInt($('#qrSize').value);
+  const canvas=$('#qrCanvas');
+  try{
+    await QRCode.toCanvas(canvas, text, {width:size, margin:2, color:{dark:'#3a4657', light:'#ffffff'}});
+    $('#qrWrap').style.display='block';
+    toast('📱 QR generated');
+  }catch(e){ toast('❌ '+e.message); }
+});
+$('#qrDl').addEventListener('click',()=>{
+  const canvas=$('#qrCanvas');
+  canvas.toBlob(b=>{ downloadBlob(b, 'qr-'+Date.now()+'.png'); toast('⬇️ QR downloaded'); }, 'image/png');
+});
+
+/* JSON */
+$('#jsonFormat').addEventListener('click',()=>{
+  const t=$('#jsonInput').value, out=$('#jsonOut');
+  if(!t.trim()){ toast('⚠️ Enter JSON'); return; }
+  out.classList.add('show');
+  try{
+    const o=JSON.parse(t);
+    out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${escapeHtml(JSON.stringify(o,null,2))}</pre>`;
+    toast('✅ Valid JSON');
+  }catch(e){ out.innerHTML=`<span class="err">❌ Invalid: ${escapeHtml(e.message)}</span>`; }
+});
+$('#jsonMinify').addEventListener('click',()=>{
+  const t=$('#jsonInput').value, out=$('#jsonOut');
+  if(!t.trim()){ toast('⚠️ Enter JSON'); return; }
+  out.classList.add('show');
+  try{
+    const o=JSON.parse(t);
+    out.innerHTML=`<pre style="margin:0;white-space:pre-wrap;font:inherit">${escapeHtml(JSON.stringify(o))}</pre>`;
+    toast('✅ Minified');
+  }catch(e){ out.innerHTML=`<span class="err">❌ Invalid: ${escapeHtml(e.message)}</span>`; }
+});
+$('#jsonClear').addEventListener('click',()=>{ $('#jsonInput').value=''; $('#jsonOut').classList.remove('show'); });
+
+/* COLOR */
+function updateColor(){
+  const hex=$('#colorInput').value;
+  $('#hexVal').textContent=hex.toUpperCase();
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  $('#rgbVal').textContent=`${r}, ${g}, ${b}`;
+  const rn=r/255, gn=g/255, bn=b/255;
+  const max=Math.max(rn,gn,bn), min=Math.min(rn,gn,bn);
+  let h,s,l=(max+min)/2;
+  if(max===min){ h=0; s=0; }
+  else{
+    const d=max-min;
+    s=l>0.5?d/(2-max-min):d/(max+min);
+    switch(max){
+      case rn: h=((gn-bn)/d+(gn<bn?6:0)); break;
+      case gn: h=((bn-rn)/d+2); break;
+      case bn: h=((rn-gn)/d+4); break;
+    }
+    h*=60;
+  }
+  $('#hslVal').textContent=`${h.toFixed(0)}°, ${(s*100).toFixed(0)}%, ${(l*100).toFixed(0)}%`;
+}
+$('#colorInput').addEventListener('input', updateColor);
+updateColor();
+$('#colorCopy').addEventListener('click',()=>{
+  navigator.clipboard.writeText($('#colorInput').value).then(()=>toast('📋 HEX copied')).catch(()=>{});
+});
+
+/* MD5 */
+function md5(input){
+  const bytes=new TextEncoder().encode(input);
+  const len=bytes.length, bitLen=len*8;
+  const totalLen=(((len+8)>>6)+1)*64;
+  const buf=new Uint8Array(totalLen);
+  buf.set(bytes); buf[len]=0x80;
+  const dv=new DataView(buf.buffer);
+  dv.setUint32(totalLen-8,bitLen>>>0,true);
+  dv.setUint32(totalLen-4,Math.floor(bitLen/4294967296),true);
+  let a0=0x67452301,b0=0xefcdab89,c0=0x98badcfe,d0=0x10325476;
+  const S=[7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
+  const K=new Uint32Array(64);
+  for(let i=0;i<64;i++) K[i]=Math.floor(Math.abs(Math.sin(i+1))*4294967296)>>>0;
+  for(let chunk=0;chunk<totalLen;chunk+=64){
+    const M=new Uint32Array(16);
+    for(let i=0;i<16;i++) M[i]=dv.getUint32(chunk+i*4,true);
+    let A=a0,B=b0,C=c0,D=d0;
+    for(let i=0;i<64;i++){
+      let F,g;
+      if(i<16){F=(B&C)|(~B&D);g=i;}
+      else if(i<32){F=(D&B)|(~D&C);g=(5*i+1)%16;}
+      else if(i<48){F=B^C^D;g=(3*i+5)%16;}
+      else{F=C^(B|~D);g=(7*i)%16;}
+      F=(F+A+K[i]+M[g])|0;
+      A=D;D=C;C=B;
+      B=(B+((F<<S[i])|(F>>>(32-S[i]))))|0;
+    }
+    a0=(a0+A)|0;b0=(b0+B)|0;c0=(c0+C)|0;d0=(d0+D)|0;
+  }
+  const out=new Uint8Array(16);
+  const ov=new DataView(out.buffer);
+  ov.setUint32(0,a0>>>0,true); ov.setUint32(4,b0>>>0,true);
+  ov.setUint32(8,c0>>>0,true); ov.setUint32(12,d0>>>0,true);
+  return [...out].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ============ ARGUS AI ============ */
+(function argus(){
+  const SYSTEM=`You are Argus, the built-in assistant of the "glsorun" website, a privacy-first OSINT and utility toolkit. You are an AI.
+Language: reply in the user's language (Hindi, English, Hinglish).
+Style: friendly, practical. Simple questions — under 120 words. Detailed questions — step-by-step up to ~350 words. Concrete over generic.
+
+SITE TOOLS: Image (metadata cleaner, compressor, EXIF timeline map, video metadata, steganography), Code (live HTML editor), OSINT (IP, DNS, WHOIS, SSL, tech detect, username scanner, email, phone, social analyzer, wayback, reverse image, speed test, AI image detector), Utilities (hash, encode, QR, password, JSON, color).
+When a tool fits, explain briefly and put [[tool:KEY]] on its own line. Keys: myip, ip, dns, whois, ssl, techdetect, username, email, phone, social, wayback, reverse, speed, deepfake, metadata, code, hash, encoder, qr, password, json, color.
+
+ETHICS: Help with lawful OSINT, verification, self-audit. Do NOT help find private persons, stalk, dox, hack, or bypass security. Never ask for passwords, OTPs, Aadhaar, or card numbers.
+Plain text, short lists, occasional **bold**.`;
+  const TOOLS={
+    myip:['osint','#myIpBtn','My IP'], ip:['osint','#ipInput','IP / Domain'], dns:['osint','#dnsInput','DNS'],
+    whois:['osint','#whoisInput','WHOIS'], ssl:['osint','#sslInput','SSL Cert'], techdetect:['osint','#techInput','Tech Detect'],
+    username:['osint','#unameInput','Username Scanner'], email:['osint','#emailInput','Email Recon'],
+    phone:['osint','#phoneInput','Phone Recon'], social:['osint','#socialInput','Social Analyzer'],
+    wayback:['osint','#wbInput','Wayback'], reverse:['osint','#imgUrlInput','Reverse Image'], speed:['osint','#speedBtn','Speed Test'],
+    deepfake:['osint','#dfDrop','AI Image Detector'], metadata:['image','#dropZone','Metadata Cleaner'],
+    code:['code','#codeInput','Code Editor'], hash:['utils','#hashInput','Hash Generator'],
+    encoder:['utils','#encInput','Encoder / Decoder'], qr:['utils','#qrInput','QR Generator'],
+    password:['utils','#pwGen','Password Generator'], json:['utils','#jsonInput','JSON Formatter'], color:['utils','#colorInput','Color Picker']
+  };
+  const CHIPS=[
+    'How do I look up a domain?',
+    'How do I strip photo metadata and check if an image is real?',
+    'How do I spot a scam or phishing link?',
+    'How do I check my own digital footprint?',
+    'Where can I find a username, and how?'
+  ];
+  const GREETING="Hi! I'm Argus, your toolkit assistant. Ask me anything about OSINT, image metadata, spotting scams, or code — I'll point you to the right tool and can open it directly.";
+
+  /* Page version */
+  const pageLog=$('#argusPageLog'), pageIn=$('#argusPageIn');
+  let history=[], busy=false, chipsEl=null;
+
+  function fmt(t, streaming){
+    let h=escapeHtml(t);
+    h=h.replace(/```(?:\w+)?\n?([\s\S]*?)```/g,(_,c)=>'<pre>'+c.replace(/\n$/,'')+'</pre>');
+    h=h.replace(/`([^`\n]+)`/g,'<code>$1</code>');
+    h=h.replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>');
+    if(streaming) h=h.replace(/\[\[[^\]]*$/,'');
+    h=h.replace(/\n?\[\[tool:(\w+)\]\]\n?/g,(m,k)=>TOOLS[k]?'\n<button class="argus-tool" type="button" data-tool="'+k+'">↗ Open '+TOOLS[k][2]+'</button>\n':'');
+    return h.trim();
+  }
+  function scroll(){ pageLog.scrollTop=pageLog.scrollHeight; }
+  function addMsg(role, text, plain, imgSrc){
+    const d=document.createElement('div');
+    d.className='argus-m '+role;
+    if(imgSrc){
+      const img=document.createElement('img');
+      img.src=imgSrc;
+      d.appendChild(img);
+    }
+    if(plain){
+      if(text){
+        const span=document.createElement('span');
+        span.textContent=text;
+        d.appendChild(span);
+      }
+    } else {
+      const wrap=document.createElement('span');
+      wrap.innerHTML=fmt(text);
+      d.appendChild(wrap);
+    }
+    pageLog.appendChild(d); scroll(); return d;
+  }
+  function greet(){
+    pageLog.innerHTML='';
+    addMsg('bot',GREETING,true);
+    chipsEl=document.createElement('div');
+    chipsEl.className='argus-chips';
+    CHIPS.forEach(c=>{
+      const b=document.createElement('button');
+      b.type='button'; b.className='argus-chip'; b.textContent=c;
+      b.addEventListener('click',()=>send(c));
+      chipsEl.appendChild(b);
+    });
+    pageLog.appendChild(chipsEl);
+  }
+  function openTool(key){
+    const t=TOOLS[key]; if(!t) return;
+    showPage(t[0]);
+    setTimeout(()=>{
+      const el=$(t[1]); if(!el) return;
+      const card=el.closest('.tool, .card') || el;
+      card.scrollIntoView({behavior:'smooth', block:'center'});
+      card.classList.remove('argus-flash'); void card.offsetWidth; card.classList.add('argus-flash');
+      setTimeout(()=>card.classList.remove('argus-flash'), 1900);
+      if(/^(INPUT|TEXTAREA)$/.test(el.tagName) && !window.matchMedia('(max-width:520px)').matches) el.focus({preventScroll:true});
+    },100);
+  }
+  pageLog.addEventListener('click', e=>{
+    const b=e.target.closest('.argus-tool'); if(b) openTool(b.dataset.tool);
+  });
+
+  /* Puter */
+  let puterP=null;
+  function loadPuter(){
+    if(window.puter) return Promise.resolve();
+    if(!puterP) puterP=new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://js.puter.com/v2/';
+      s.onload=()=>res();
+      s.onerror=()=>{puterP=null;rej(new Error('puter-load'));};
+      document.head.appendChild(s);
+    });
+    return puterP;
+  }
+  function extract(r){
+    if(typeof r==='string') return r;
+    const c=(r&&r.message&&r.message.content) ?? (r&&r.text) ?? '';
+    return Array.isArray(c)?c.map(b=>(b&&b.text)||'').join(''):String(c);
+  }
+  async function ask(msgs, onChunk){
+    await loadPuter();
+    let text='';
+    try{
+      const resp=await puter.ai.chat(msgs,{stream:true});
+      for await(const part of resp){ if(part&&part.text){ text+=part.text; onChunk(text); } }
+      if(text) return text;
+    }catch(e){ if(text) return text; }
+    text=extract(await puter.ai.chat(msgs));
+    onChunk(text); return text;
+  }
+
+  /* Attach */
+  const attachBtn=$('#argusPageAttach'), attachInput=$('#argusPageFile'), previewBox=$('#argusPagePreview');
+  attachBtn.addEventListener('click',()=>attachInput.click());
+  attachInput.addEventListener('change', e=>{
+    if(e.target.files[0]) addAttachment(e.target.files[0]);
+  });
+  let attachments=[];
+  function addAttachment(file){
+    if(file.size>5*1024*1024){ toast('⚠️ File too large (max 5MB)'); return; }
+    if(attachments.length>=3){ toast('⚠️ Max 3 attachments'); return; }
+    const entry={file, previewUrl:null, textContent:null};
+    const chip=document.createElement('div');
+    chip.className='chip-file';
+    const size=humanSize(file.size);
+    chip.innerHTML='<span>📎 '+escapeHtml(file.name)+' ('+size+')</span><span class="x">✕</span>';
+    if(file.type.startsWith('image/')){
+      entry.previewUrl=URL.createObjectURL(file);
+      chip.insertAdjacentHTML('afterbegin','<img src="'+entry.previewUrl+'" alt="">');
+    }
+    chip.querySelector('.x').addEventListener('click',()=>{
+      attachments=attachments.filter(a=>a!==entry);
+      chip.remove();
+      if(!attachments.length) previewBox.classList.remove('show');
+    });
+    attachments.push(entry);
+    previewBox.appendChild(chip);
+    previewBox.classList.add('show');
+  }
+  async function fileToText(file){
+    return new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=()=>res(r.result);
+      r.onerror=rej;
+      r.readAsText(file);
+    });
+  }
+  async function fileToDataURL(file){
+    return new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=()=>res(r.result);
+      r.onerror=rej;
+      r.readAsDataURL(file);
+    });
+  }
+
+  async function send(text, shown){
+    text=(text||'').trim();
+    if((!text && !attachments.length) || busy) return;
+    busy=true; $('#argusPageSend').disabled=true;
+    if(chipsEl){ chipsEl.remove(); chipsEl=null; }
+
+    // Build user message
+    let userContent=[];
+    if(text) userContent.push({type:'text', text});
+    const attachmentTexts=[];
+    for(const a of attachments){
+      if(a.file.type.startsWith('image/')){
+        const dataUrl=await fileToDataURL(a.file);
+        userContent.push({type:'image_url', image_url:{url:dataUrl}});
+      } else if(a.file.size<1024*1024){
+        try{
+          const txt=await fileToText(a.file);
+          attachmentTexts.push(`[File: ${a.file.name}]\n${txt}`);
+        }catch(e){}
+      }
+    }
+    if(attachmentTexts.length){
+      userContent.push({type:'text', text:'Attached files:\n\n'+attachmentTexts.join('\n\n---\n\n')});
+    }
+
+    // Add message UI
+    const imgSrc=attachments.find(a=>a.previewUrl)?.previewUrl;
+    addMsg('user', text || '(image)', true, imgSrc);
+
+    // Build messages for API
+    const apiMsg=[{role:'system', content:SYSTEM}, ...history.slice(-12), {role:'user', content:userContent}];
+    history.push({role:'user', content:userContent});
+
+    // Clear attachments
+    attachments=[]; previewBox.innerHTML=''; previewBox.classList.remove('show');
+
+    const bubble=addMsg('bot','',true);
+    bubble.innerHTML='<span class="spin"></span> Thinking…';
+    try{
+      const reply=await ask(apiMsg, t=>{ bubble.innerHTML=fmt(t,true); scroll(); });
+      if(!reply.trim()) throw new Error('empty');
+      history.push({role:'assistant', content:reply});
+      bubble.innerHTML=fmt(reply);
+    }catch(e){
+      history.pop();
+      bubble.classList.add('argus-err');
+      bubble.textContent='⚠️ Could not get a response right now. Check your internet and try again. If a Puter login popup appeared, please complete it.';
+    }
+    busy=false; $('#argusPageSend').disabled=false; scroll();
+  }
+
+  $('#argusPageSend').addEventListener('click',()=>{ const v=pageIn.value; pageIn.value=''; pageIn.style.height='auto'; send(v); });
+  pageIn.addEventListener('keydown', e=>{
+    if(e.key==='Enter' && !e.shiftKey && !e.isComposing){ e.preventDefault(); $('#argusPageSend').click(); }
+  });
+  pageIn.addEventListener('input',()=>{
+    pageIn.style.height='auto';
+    pageIn.style.height=Math.min(pageIn.scrollHeight, 110)+'px';
+  });
+  $('#argusPageClear').addEventListener('click',()=>{ if(busy) return; history=[]; greet(); });
+
+  greet();
+
+  /* FAB — opens Argus tab */
+  const fab=$('#argusFab'), tip=$('#argusTip');
+  fab.addEventListener('click',()=>{
+    showPage('argus');
+    tip.classList.remove('show');
+    setTimeout(()=>pageIn.focus(), 300);
+  });
+  setTimeout(()=>{ tip.classList.add('show'); setTimeout(()=>tip.classList.remove('show'), 5500); }, 1800);
+
+  /* Explain with Argus buttons under tool outputs */
+  ['myIpOut','ipOut','dnsOut','whoisOut','sslOut','techOut','socialOut','emailOut','phoneOut','wbOut'].forEach(id=>{
+    const out=document.getElementById(id); if(!out) return;
+    let timer;
+    new MutationObserver(()=>{ clearTimeout(timer); timer=setTimeout(()=>addExplain(out), 350); }).observe(out, {childList:true});
+  });
+  function addExplain(out){
+    if(out.querySelector('.argus-explain, .spin, .err')) return;
+    if(!out.classList.contains('show') || out.textContent.trim().length<20) return;
+    const b=document.createElement('button');
+    b.type='button'; b.className='argus-explain'; b.textContent='🤖 Explain with Argus';
+    b.addEventListener('click',()=>{
+      const clone=out.cloneNode(true);
+      clone.querySelectorAll('.argus-explain').forEach(x=>x.remove());
+      clone.querySelectorAll('br').forEach(x=>x.replaceWith('\n'));
+      const txt=(clone.textContent||'').replace(/\n{3,}/g,'\n\n').trim().slice(0,3500);
+      showPage('argus');
+      send('Explain this result in plain language: what does it mean, and is anything worth attention or suspicious?\n\n'+txt, '🤖 Explain this result');
+    });
+    out.appendChild(b);
+  }
+})();
+
+/* INIT */
+(function(){
+  preview.srcdoc='<body style="font-family:system-ui,sans-serif;display:grid;place-items:center;height:100vh;margin:0;background:transparent;color:#8a95a6;font-size:14px;text-align:center;line-height:1.8"><div><div style="font-size:38px;margin-bottom:10px;opacity:.5">👁️</div>Live preview will appear here<br><span style="font-size:12px;opacity:.7">Write code on the left or click "Load Sample"</span></div></body>';
+  console.log('%cglsorun Toolkit ready ✨','color:#5b7cfa;font-weight:700;font-size:14px');
+})();
+</script>
+</body>
+</html>
